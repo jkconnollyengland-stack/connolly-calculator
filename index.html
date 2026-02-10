@@ -139,6 +139,7 @@
         const [adminMode, setAdminMode] = useState(false);
         const [adminPwd, setAdminPwd] = useState("");
         const [editingCell, setEditingCell] = useState(null);
+        const [handlingFeeOverride, setHandlingFeeOverride] = useState(null);
 
         const [data, setData] = useState(() => {
             // Try to load from localStorage first
@@ -200,10 +201,13 @@
         }, [country, items, data]);
         
         const handlingFee = useMemo(() => {
+            // Use global override if set
+            if (handlingFeeOverride !== null) return handlingFeeOverride;
+            
             if (!country || Object.keys(categoryTotals).length === 0) return 0;
             const firstRow = data.find(d => d.country === country);
             return firstRow ? firstRow.T : 16;
-        }, [country, categoryTotals, data]);
+        }, [country, categoryTotals, data, handlingFeeOverride]);
         
         const grandTotal = useMemo(() => {
             let total = 0;
@@ -444,6 +448,70 @@
                             }
                         }, '🔄 Reset to Original')
                     )
+                    ),
+                    
+                    // Global Handling Fee Override
+                    e('div', {
+                        style: {
+                            background: 'rgba(201,169,110,0.15)',
+                            borderRadius: '12px',
+                            border: '2px solid #c9a96e',
+                            padding: '28px',
+                            marginBottom: '24px'
+                        }
+                    },
+                        e('h2', { style: { fontSize: '24px', marginBottom: '12px', color: '#c9a96e', fontWeight: 600 } }, '💷 Global Handling Fee'),
+                        e('p', { style: { marginBottom: '20px', color: '#c9a96e', opacity: 0.9, fontSize: '18px' } }, 
+                            'Set one handling fee for all countries. Leave empty to use individual country values.'
+                        ),
+                        e('div', { style: { display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap' } },
+                            e('label', { style: { color: '#c9a96e', fontSize: '20px', fontWeight: 600 } }, 'Handling Fee (£):'),
+                            e('input', {
+                                type: 'number',
+                                step: '0.01',
+                                min: '0',
+                                value: handlingFeeOverride === null ? '' : handlingFeeOverride,
+                                onChange: (ev) => {
+                                    const val = ev.target.value;
+                                    setHandlingFeeOverride(val === '' ? null : parseFloat(val));
+                                },
+                                placeholder: 'e.g., 15.00',
+                                style: {
+                                    padding: '14px 18px',
+                                    fontSize: '20px',
+                                    background: '#fff',
+                                    border: '2px solid #c9a96e',
+                                    borderRadius: '8px',
+                                    color: '#000',
+                                    width: '180px',
+                                    fontWeight: 600
+                                }
+                            }),
+                            handlingFeeOverride !== null && e('button', {
+                                onClick: () => setHandlingFeeOverride(null),
+                                style: {
+                                    padding: '14px 24px',
+                                    background: '#8b7355',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    fontSize: '18px',
+                                    fontWeight: 600
+                                }
+                            }, 'Clear Override')
+                        ),
+                        handlingFeeOverride !== null && e('div', { 
+                            style: { 
+                                marginTop: '18px', 
+                                padding: '16px',
+                                background: 'rgba(201,169,110,0.2)',
+                                borderRadius: '8px',
+                                color: '#c9a96e', 
+                                fontSize: '18px',
+                                fontWeight: 600 
+                            } 
+                        }, `✓ Active: All calculations now use £${handlingFeeOverride.toFixed(2)} handling fee`)
                     ),
                     
                     // Country selector for admin
