@@ -10,7 +10,6 @@
     <!-- Firebase v9 - compat version -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     
     <script>
         // Initialize Firebase
@@ -26,7 +25,6 @@
         
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
-        const storage = firebase.storage();
     </script>
     
     <style>
@@ -245,12 +243,27 @@
             const [dutyPaid, setDutyPaid] = useState('unpaid');
             const [receiptFile, setReceiptFile] = useState(null);
             const [staffMember, setStaffMember] = useState('');
+            const [itemDetails, setItemDetails] = useState([{ description: '', composition: '', origin: '' }]);
             const [additionalNotes, setAdditionalNotes] = useState('');
             
             const handleFileChange = (ev) => {
                 if (ev.target.files[0]) {
                     setReceiptFile(ev.target.files[0]);
                 }
+            };
+            
+            const addItemRow = () => {
+                setItemDetails([...itemDetails, { description: '', composition: '', origin: '' }]);
+            };
+            
+            const removeItemRow = (index) => {
+                setItemDetails(itemDetails.filter((_, i) => i !== index));
+            };
+            
+            const updateItemDetail = (index, field, value) => {
+                const newItems = [...itemDetails];
+                newItems[index][field] = value;
+                setItemDetails(newItems);
             };
             
             const handleSubmit = async (ev) => {
@@ -260,23 +273,19 @@
                 
                 try {
                     console.log('Starting submission...');
-                    // TEMPORARY: Skip receipt upload due to CORS
-                    // We'll fix this properly after testing
-                    console.log('Skipping receipt upload (CORS issue)');
-                    let receiptUrl = receiptFile ? 'Receipt file selected: ' + receiptFile.name : null;
+                    let receiptUrl = null;
                     
-                    /*
-                    // Upload receipt photo if provided
+                    // Convert receipt photo to base64 (no Firebase Storage needed)
                     if (receiptFile) {
-                        console.log('Uploading receipt...');
-                        const timestamp = Date.now();
-                        const fileName = `receipts/${timestamp}_${receiptFile.name}`;
-                        const storageRef = storage.ref(fileName);
-                        const snapshot = await storageRef.put(receiptFile);
-                        receiptUrl = await snapshot.ref.getDownloadURL();
-                        console.log('Receipt uploaded:', receiptUrl);
+                        console.log('Converting receipt to base64...');
+                        receiptUrl = await new Promise((resolve, reject) => {
+                            const reader = new FileReader();
+                            reader.onload = () => resolve(reader.result);
+                            reader.onerror = reject;
+                            reader.readAsDataURL(receiptFile);
+                        });
+                        console.log('Receipt converted to base64');
                     }
-                    */
                     
                     // Create order object
                     const order = {
@@ -298,7 +307,9 @@
                         dutyPaid: dutyPaid === 'paid',
                         receiptUrl,
                         staffMember,
+                        itemDetails: itemDetails.filter(item => item.description || item.composition || item.origin),
                         additionalNotes,
+                        trackingNumber: null,
                         status: 'pending'
                     };
                     
@@ -521,7 +532,7 @@
                     ),
                     
                     e('div', { className: 'form-group' },
-                        e('label', {}, 'Receipt Photo'),
+                        e('label', {}, 'Receipt Photo *'),
                         e('label', {
                             className: 'file-upload',
                             htmlFor: 'receipt-upload'
@@ -530,10 +541,11 @@
                                 type: 'file',
                                 id: 'receipt-upload',
                                 accept: 'image/*',
+                                required: true,
                                 onChange: handleFileChange
                             }),
                             e('div', { className: 'file-upload-text' },
-                                receiptFile ? '✓ File selected' : '📸 Click to upload receipt photo (optional for now)'
+                                receiptFile ? '✓ File selected' : '📸 Click to upload receipt photo'
                             ),
                             receiptFile && e('div', { className: 'file-name' }, receiptFile.name)
                         )
@@ -549,6 +561,89 @@
                             placeholder: 'Your name'
                         })
                     ),
+                    
+                    e('h2', {}, 'Item Details for Customs'),
+                    e('div', { style: { marginBottom: '15px', color: 'rgba(201,169,110,0.7)', fontSize: '16px' } },
+                        'Describe items being shipped (for customs documentation)'
+                    ),
+                    
+                    // Item details table
+                    itemDetails.map((item, i) =>
+                        e('div', {
+                            key: i,
+                            style: {
+                                background: 'rgba(201,169,110,0.05)',
+                                border: '1px solid rgba(201,169,110,0.2)',
+                                borderRadius: '8px',
+                                padding: '15px',
+                                marginBottom: '15px'
+                            }
+                        },
+                            e('div', { style: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' } },
+                                e('strong', { style: { color: '#c9a96e', fontSize: '16px' } }, 'Item ' + (i + 1)),
+                                itemDetails.length > 1 && e('button', {
+                                    type: 'button',
+                                    onClick: () => removeItemRow(i),
+                                    style: {
+                                        background: 'rgba(244, 67, 54, 0.2)',
+                                        border: '1px solid rgba(244, 67, 54, 0.4)',
+                                        color: '#f44336',
+                                        padding: '6px 12px',
+                                        borderRadius: '6px',
+                                        cursor: 'pointer',
+                                        fontSize: '14px',
+                                        fontWeight: 600
+                                    }
+                                }, '× Remove')
+                            ),
+                            e('div', { className: 'form-group', style: { marginBottom: '12px' } },
+                                e('label', {}, 'Description'),
+                                e('input', {
+                                    type: 'text',
+                                    value: item.description,
+                                    onChange: (ev) => updateItemDetail(i, 'description', ev.target.value),
+                                    placeholder: 'e.g., Wool Trousers, Cotton Shirt, Leather Bag'
+                                })
+                            ),
+                            e('div', { style: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' } },
+                                e('div', { className: 'form-group', style: { marginBottom: 0 } },
+                                    e('label', {}, 'Composition'),
+                                    e('input', {
+                                        type: 'text',
+                                        value: item.composition,
+                                        onChange: (ev) => updateItemDetail(i, 'composition', ev.target.value),
+                                        placeholder: 'e.g., 100% Wool, Leather & Horn'
+                                    })
+                                ),
+                                e('div', { className: 'form-group', style: { marginBottom: 0 } },
+                                    e('label', {}, 'Country of Origin'),
+                                    e('input', {
+                                        type: 'text',
+                                        value: item.origin,
+                                        onChange: (ev) => updateItemDetail(i, 'origin', ev.target.value),
+                                        placeholder: 'e.g., United Kingdom, Italy'
+                                    })
+                                )
+                            )
+                        )
+                    ),
+                    
+                    e('button', {
+                        type: 'button',
+                        onClick: addItemRow,
+                        style: {
+                            width: '100%',
+                            padding: '12px',
+                            background: 'rgba(201,169,110,0.1)',
+                            border: '2px dashed rgba(201,169,110,0.3)',
+                            borderRadius: '8px',
+                            color: '#c9a96e',
+                            fontSize: '16px',
+                            fontWeight: 600,
+                            cursor: 'pointer',
+                            marginBottom: '20px'
+                        }
+                    }, '+ Add Another Item'),
                     
                     e('div', { className: 'form-group' },
                         e('label', {}, 'Additional Notes'),
