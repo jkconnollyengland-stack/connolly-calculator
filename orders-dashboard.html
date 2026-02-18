@@ -500,6 +500,87 @@
                                             e('span', { className: 'duty-badge ' + (order.dutyPaid ? 'duty-paid' : 'duty-unpaid') }, 
                                                 order.dutyPaid ? 'PAID' : 'UNPAID')
                                         ),
+                                        
+                                        // Tracking Number
+                                        e('div', { style: { marginTop: '15px', padding: '12px', background: 'rgba(33, 150, 243, 0.1)', borderRadius: '8px', border: '1px solid rgba(33, 150, 243, 0.3)' } },
+                                            e('div', { className: 'info-label', style: { marginBottom: '8px' } }, '📦 Tracking Number:'),
+                                            order.trackingNumber ? 
+                                                e('div', {},
+                                                    e('a', { 
+                                                        href: order.trackingNumber, 
+                                                        target: '_blank',
+                                                        style: { color: '#2196F3', fontSize: '14px', wordBreak: 'break-all' }
+                                                    }, order.trackingNumber),
+                                                    e('button', {
+                                                        onClick: () => {
+                                                            const newTracking = prompt('Update tracking number:', order.trackingNumber);
+                                                            if (newTracking !== null) {
+                                                                db.ref(`shipping-orders/${orderId}`).update({ trackingNumber: newTracking });
+                                                            }
+                                                        },
+                                                        style: {
+                                                            marginTop: '8px',
+                                                            padding: '6px 12px',
+                                                            background: 'rgba(255,255,255,0.1)',
+                                                            border: '1px solid rgba(201,169,110,0.3)',
+                                                            borderRadius: '6px',
+                                                            color: '#c9a96e',
+                                                            cursor: 'pointer',
+                                                            fontSize: '12px'
+                                                        }
+                                                    }, 'Update')
+                                                )
+                                            :
+                                                e('button', {
+                                                    onClick: () => {
+                                                        const tracking = prompt('Enter tracking URL:');
+                                                        if (tracking) {
+                                                            db.ref(`shipping-orders/${orderId}`).update({ trackingNumber: tracking });
+                                                        }
+                                                    },
+                                                    style: {
+                                                        padding: '10px 16px',
+                                                        background: '#2196F3',
+                                                        border: 'none',
+                                                        borderRadius: '6px',
+                                                        color: 'white',
+                                                        cursor: 'pointer',
+                                                        fontSize: '14px',
+                                                        fontWeight: 600
+                                                    }
+                                                }, '+ Add Tracking Number')
+                                        ),
+                                        
+                                        // Item Details
+                                        order.itemDetails && order.itemDetails.length > 0 && e('div', { style: { marginTop: '15px' } },
+                                            e('div', { className: 'info-label', style: { marginBottom: '10px', fontSize: '16px', fontWeight: 600 } }, 'Items for Customs:'),
+                                            order.itemDetails.map((item, idx) =>
+                                                e('div', {
+                                                    key: idx,
+                                                    style: {
+                                                        background: 'rgba(255,255,255,0.02)',
+                                                        padding: '10px',
+                                                        borderRadius: '6px',
+                                                        marginBottom: '8px',
+                                                        border: '1px solid rgba(201,169,110,0.15)'
+                                                    }
+                                                },
+                                                    item.description && e('div', { style: { marginBottom: '4px' } },
+                                                        e('strong', { style: { color: 'rgba(201,169,110,0.9)', fontSize: '13px' } }, 'Description: '),
+                                                        e('span', { style: { color: 'rgba(201,169,110,0.7)', fontSize: '13px' } }, item.description)
+                                                    ),
+                                                    item.composition && e('div', { style: { marginBottom: '4px' } },
+                                                        e('strong', { style: { color: 'rgba(201,169,110,0.9)', fontSize: '13px' } }, 'Composition: '),
+                                                        e('span', { style: { color: 'rgba(201,169,110,0.7)', fontSize: '13px' } }, item.composition)
+                                                    ),
+                                                    item.origin && e('div', {},
+                                                        e('strong', { style: { color: 'rgba(201,169,110,0.9)', fontSize: '13px' } }, 'Origin: '),
+                                                        e('span', { style: { color: 'rgba(201,169,110,0.7)', fontSize: '13px' } }, item.origin)
+                                                    )
+                                                )
+                                            )
+                                        ),
+                                        
                                         order.receiptUrl && e('div', { style: { marginTop: '15px' } },
                                             e('div', { className: 'info-label', style: { marginBottom: '8px' } }, 'Receipt:'),
                                             e('a', { href: order.receiptUrl, target: '_blank' },
