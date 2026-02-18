@@ -260,8 +260,12 @@
                 
                 try {
                     console.log('Starting submission...');
-                    let receiptUrl = null;
+                    // TEMPORARY: Skip receipt upload due to CORS
+                    // We'll fix this properly after testing
+                    console.log('Skipping receipt upload (CORS issue)');
+                    let receiptUrl = receiptFile ? 'Receipt file selected: ' + receiptFile.name : null;
                     
+                    /*
                     // Upload receipt photo if provided
                     if (receiptFile) {
                         console.log('Uploading receipt...');
@@ -272,6 +276,7 @@
                         receiptUrl = await snapshot.ref.getDownloadURL();
                         console.log('Receipt uploaded:', receiptUrl);
                     }
+                    */
                     
                     // Create order object
                     const order = {
