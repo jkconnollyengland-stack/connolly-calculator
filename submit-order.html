@@ -6,12 +6,14 @@
     <title>Submit Shipping Order - Connolly</title>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script type="module">
-        // Firebase imports
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getDatabase, ref, push, set } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
-        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
-        
+    
+    <!-- Firebase v9 - compat version -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
+    
+    <script>
+        // Initialize Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDbd3uX-VfqtLm7v_jkzGzvFD5GFCf8eSw",
             authDomain: "swis-9b0ce.firebaseapp.com",
@@ -22,16 +24,11 @@
             appId: "1:25689930290:web:a5370855e0dd7104071a2b"
         };
         
-        const app = initializeApp(firebaseConfig);
-        window.firebaseDb = getDatabase(app);
-        window.firebaseStorage = getStorage(app);
-        window.firebaseRef = ref;
-        window.firebasePush = push;
-        window.firebaseSet = set;
-        window.storageRef = storageRef;
-        window.uploadBytes = uploadBytes;
-        window.getDownloadURL = getDownloadURL;
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+        const storage = firebase.storage();
     </script>
+    
     <style>
         * { box-sizing: border-box; }
         body {
@@ -210,6 +207,14 @@
             font-size: 18px;
             line-height: 1.6;
         }
+        .error-message {
+            background: rgba(244, 67, 54, 0.2);
+            border: 1px solid rgba(244, 67, 54, 0.4);
+            color: #f44336;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
     </style>
 </head>
 <body>
@@ -221,6 +226,7 @@
         function App() {
             const [submitted, setSubmitted] = useState(false);
             const [submitting, setSubmitting] = useState(false);
+            const [error, setError] = useState(null);
             
             // Get calculation data from URL params
             const params = new URLSearchParams(window.location.search);
@@ -241,26 +247,30 @@
             const [staffMember, setStaffMember] = useState('');
             const [additionalNotes, setAdditionalNotes] = useState('');
             
-            const handleFileChange = (e) => {
-                if (e.target.files[0]) {
-                    setReceiptFile(e.target.files[0]);
+            const handleFileChange = (ev) => {
+                if (ev.target.files[0]) {
+                    setReceiptFile(ev.target.files[0]);
                 }
             };
             
             const handleSubmit = async (ev) => {
                 ev.preventDefault();
                 setSubmitting(true);
+                setError(null);
                 
                 try {
+                    console.log('Starting submission...');
                     let receiptUrl = null;
                     
                     // Upload receipt photo if provided
                     if (receiptFile) {
+                        console.log('Uploading receipt...');
                         const timestamp = Date.now();
                         const fileName = `receipts/${timestamp}_${receiptFile.name}`;
-                        const fileRef = window.storageRef(window.firebaseStorage, fileName);
-                        await window.uploadBytes(fileRef, receiptFile);
-                        receiptUrl = await window.getDownloadURL(fileRef);
+                        const storageRef = storage.ref(fileName);
+                        const snapshot = await storageRef.put(receiptFile);
+                        receiptUrl = await snapshot.ref.getDownloadURL();
+                        console.log('Receipt uploaded:', receiptUrl);
                     }
                     
                     // Create order object
@@ -287,15 +297,15 @@
                         status: 'pending'
                     };
                     
+                    console.log('Saving order to Firebase...');
                     // Save to Firebase
-                    const ordersRef = window.firebaseRef(window.firebaseDb, 'shipping-orders');
-                    const newOrderRef = window.firebasePush(ordersRef);
-                    await window.firebaseSet(newOrderRef, order);
+                    await db.ref('shipping-orders').push(order);
                     
+                    console.log('Order submitted successfully!');
                     setSubmitted(true);
-                } catch (error) {
-                    console.error('Error submitting order:', error);
-                    alert('Error submitting order. Please try again.');
+                } catch (err) {
+                    console.error('Error submitting order:', err);
+                    setError(err.message || 'Error submitting order. Please try again.');
                     setSubmitting(false);
                 }
             };
@@ -308,7 +318,7 @@
                     ),
                     e('button', {
                         className: 'btn btn-secondary',
-                        onClick: () => window.location.href = 'index.html'
+                        onClick: () => window.location.href = './'
                     }, '← Back to Calculator')
                 );
             }
@@ -324,7 +334,7 @@
                         e('button', {
                             className: 'btn btn-primary',
                             style: { marginTop: '40px', maxWidth: '400px' },
-                            onClick: () => window.location.href = 'index.html'
+                            onClick: () => window.location.href = './'
                         }, 'Submit Another Order')
                     )
                 );
@@ -333,6 +343,10 @@
             return e('div', { className: 'container' },
                 e('h1', {}, 'Submit Shipping Order'),
                 e('div', { className: 'subtitle' }, 'Complete the form below to send this order to the warehouse'),
+                
+                error && e('div', { className: 'error-message' }, 
+                    '⚠️ ' + error
+                ),
                 
                 // Calculation Summary
                 e('div', { className: 'summary-box' },
@@ -550,7 +564,7 @@
                     e('button', {
                         type: 'button',
                         className: 'btn btn-secondary',
-                        onClick: () => window.location.href = 'index.html'
+                        onClick: () => window.location.href = './'
                     }, 'Cancel')
                 )
             );
