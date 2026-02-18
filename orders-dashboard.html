@@ -296,6 +296,66 @@
             font-size: 14px;
             font-style: italic;
         }
+        
+        /* Receipt Modal/Lightbox */
+        .receipt-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.95);
+            z-index: 9999;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        .receipt-modal.active {
+            display: flex;
+        }
+        .receipt-modal-content {
+            max-width: 90vw;
+            max-height: 90vh;
+            position: relative;
+        }
+        .receipt-modal img {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+            border-radius: 8px;
+        }
+        .receipt-modal-close {
+            position: absolute;
+            top: -40px;
+            right: 0;
+            background: #c9a96e;
+            color: #0f1724;
+            border: none;
+            border-radius: 8px;
+            padding: 10px 20px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .receipt-preview {
+            width: 100%;
+            max-width: 300px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: 2px solid rgba(201,169,110,0.2);
+        }
+        .receipt-preview:hover {
+            transform: scale(1.05);
+            border-color: rgba(201,169,110,0.6);
+        }
+        .receipt-hint {
+            font-size: 12px;
+            color: rgba(201,169,110,0.6);
+            margin-top: 6px;
+            font-style: italic;
+        }
     </style>
 </head>
 <body>
@@ -307,6 +367,7 @@
         function App() {
             const [orders, setOrders] = useState({});
             const [filter, setFilter] = useState('all'); // all, pending, processing, completed
+            const [modalImage, setModalImage] = useState(null);
             
             useEffect(() => {
                 const ordersRef = db.ref('shipping-orders');
@@ -583,12 +644,16 @@
                                         
                                         order.receiptUrl && e('div', { style: { marginTop: '15px' } },
                                             e('div', { className: 'info-label', style: { marginBottom: '8px' } }, 'Receipt:'),
-                                            e('a', { href: order.receiptUrl, target: '_blank' },
+                                            e('div', { 
+                                                onClick: () => setModalImage(order.receiptUrl),
+                                                style: { cursor: 'pointer' }
+                                            },
                                                 e('img', { 
                                                     src: order.receiptUrl, 
                                                     className: 'receipt-preview',
                                                     alt: 'Receipt'
-                                                })
+                                                }),
+                                                e('div', { className: 'receipt-hint' }, '🔍 Click to enlarge')
                                             )
                                         ),
                                         !order.receiptUrl && e('div', { className: 'no-receipt' }, 'No receipt uploaded'),
@@ -615,6 +680,23 @@
                                 )
                             )
                         )
+                    )
+                ),
+                
+                // Receipt Modal
+                modalImage && e('div', { 
+                    className: 'receipt-modal active',
+                    onClick: () => setModalImage(null)
+                },
+                    e('div', { 
+                        className: 'receipt-modal-content',
+                        onClick: (ev) => ev.stopPropagation()
+                    },
+                        e('button', {
+                            className: 'receipt-modal-close',
+                            onClick: () => setModalImage(null)
+                        }, '✕ Close'),
+                        e('img', { src: modalImage, alt: 'Receipt Full Size' })
                     )
                 )
             );
