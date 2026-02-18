@@ -217,6 +217,31 @@
             return total + handlingFee;
         }, [categoryTotals, handlingFee]);
         
+        // Breakdown totals
+        const totalGoods = useMemo(() => {
+            let total = 0;
+            Object.values(categoryTotals).forEach(t => {
+                total += t.itemValue;
+            });
+            return total;
+        }, [categoryTotals]);
+        
+        const totalDuty = useMemo(() => {
+            let total = 0;
+            Object.values(categoryTotals).forEach(t => {
+                total += t.duty;
+            });
+            return total;
+        }, [categoryTotals]);
+        
+        const totalTax = useMemo(() => {
+            let total = 0;
+            Object.values(categoryTotals).forEach(t => {
+                total += t.tax;
+            });
+            return total;
+        }, [categoryTotals]);
+        
         const shippingBoxes = useMemo(() => {
             if (!country) return [];
             const firstRow = data.find(d => d.country === country);
@@ -879,7 +904,7 @@
                                     )
                                 ),
                                 e('div', { style: { flex: 1 } },
-                                    e('label', { style: { display: 'block', fontSize: '19px', color: '#c9a96e', marginBottom: '6px', fontWeight: 600 } }, 'Total Value (£)'),
+                                    e('label', { style: { display: 'block', fontSize: '19px', color: '#c9a96e', marginBottom: '6px', fontWeight: 600 } }, 'Total Export Value (£)'),
                                     e('div', { style: { position: 'relative' } },
                                         e('span', { 
                                             style: { 
@@ -1036,6 +1061,78 @@
                                 fontWeight: 600
                             } 
                         }, '£' + fmt(handlingFee))
+                    ),
+                    
+                    // Breakdown totals
+                    e('div', { style: { borderTop: '2px solid rgba(201,169,110,0.3)', margin: '12px 0 8px' } }),
+                    e('div', {
+                        style: {
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'baseline',
+                            padding: '4px 0'
+                        }
+                    },
+                        e('span', { 
+                            style: { 
+                                fontSize: '21px', 
+                                color: '#c9a96e',
+                                fontWeight: 600
+                            } 
+                        }, 'Total Goods'),
+                        e('span', { 
+                            style: { 
+                                fontSize: '21px', 
+                                color: '#c9a96e',
+                                fontWeight: 600
+                            } 
+                        }, '£' + fmt(totalGoods))
+                    ),
+                    e('div', {
+                        style: {
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'baseline',
+                            padding: '4px 0'
+                        }
+                    },
+                        e('span', { 
+                            style: { 
+                                fontSize: '21px', 
+                                color: '#c9a96e',
+                                fontWeight: 600
+                            } 
+                        }, 'Total Duty'),
+                        e('span', { 
+                            style: { 
+                                fontSize: '21px', 
+                                color: '#c9a96e',
+                                fontWeight: 600
+                            } 
+                        }, '£' + fmt(totalDuty))
+                    ),
+                    e('div', {
+                        style: {
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'baseline',
+                            padding: '4px 0'
+                        }
+                    },
+                        e('span', { 
+                            style: { 
+                                fontSize: '21px', 
+                                color: '#c9a96e',
+                                fontWeight: 600
+                            } 
+                        }, 'Total Tax'),
+                        e('span', { 
+                            style: { 
+                                fontSize: '21px', 
+                                color: '#c9a96e',
+                                fontWeight: 600
+                            } 
+                        }, '£' + fmt(totalTax))
                     ),
                     e('div', { style: { borderTop: '1px solid rgba(201,169,110,0.3)', margin: '8px 0 4px' } }),
                     e('div', {
