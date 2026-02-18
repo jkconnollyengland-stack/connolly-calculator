@@ -140,6 +140,7 @@
         const [adminPwd, setAdminPwd] = useState("");
         const [editingCell, setEditingCell] = useState(null);
         const [handlingFeeOverride, setHandlingFeeOverride] = useState(null);
+        const [postageOverride, setPostageOverride] = useState(null);
 
         const [data, setData] = useState(() => {
             // Try to load from localStorage first
@@ -246,13 +247,25 @@
             if (!country) return [];
             const firstRow = data.find(d => d.country === country);
             if (!firstRow) return [];
+            
+            // If postage override is set, use it for all boxes
+            if (postageOverride !== null) {
+                return BOX_LABELS.map((label, i) => ({
+                    label,
+                    dims: BOX_DIMS[i],
+                    price: postageOverride,
+                    total: grandTotal + postageOverride
+                }));
+            }
+            
+            // Otherwise use individual box prices from data
             return firstRow.boxes.map((price, i) => ({
               label: BOX_LABELS[i],
               dims: BOX_DIMS[i],
               price,
               total: grandTotal + price
             }));
-        }, [country, grandTotal, data]);
+        }, [country, grandTotal, data, postageOverride]);
         
         
         
@@ -537,6 +550,70 @@
                                 fontWeight: 600 
                             } 
                         }, `✓ Active: All calculations now use £${handlingFeeOverride.toFixed(2)} handling fee`)
+                    ),
+                    
+                    // Flat Rate Postage Override
+                    e('div', {
+                        style: {
+                            background: 'rgba(201,169,110,0.15)',
+                            borderRadius: '12px',
+                            border: '2px solid #c9a96e',
+                            padding: '28px',
+                            marginBottom: '24px'
+                        }
+                    },
+                        e('h2', { style: { fontSize: '24px', marginBottom: '12px', color: '#c9a96e', fontWeight: 600 } }, '📦 Flat Rate Postage'),
+                        e('p', { style: { marginBottom: '20px', color: '#c9a96e', opacity: 0.9, fontSize: '18px' } }, 
+                            'Set one flat postage rate for all box sizes. Leave empty to use individual box prices.'
+                        ),
+                        e('div', { style: { display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap' } },
+                            e('label', { style: { color: '#c9a96e', fontSize: '20px', fontWeight: 600 } }, 'Postage Rate (£):'),
+                            e('input', {
+                                type: 'number',
+                                step: '0.01',
+                                min: '0',
+                                value: postageOverride === null ? '' : postageOverride,
+                                onChange: (ev) => {
+                                    const val = ev.target.value;
+                                    setPostageOverride(val === '' ? null : parseFloat(val));
+                                },
+                                placeholder: 'e.g., 25.00',
+                                style: {
+                                    padding: '14px 18px',
+                                    fontSize: '20px',
+                                    background: '#fff',
+                                    border: '2px solid #c9a96e',
+                                    borderRadius: '8px',
+                                    color: '#000',
+                                    width: '180px',
+                                    fontWeight: 600
+                                }
+                            }),
+                            postageOverride !== null && e('button', {
+                                onClick: () => setPostageOverride(null),
+                                style: {
+                                    padding: '14px 24px',
+                                    background: '#8b7355',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    fontSize: '18px',
+                                    fontWeight: 600
+                                }
+                            }, 'Clear Override')
+                        ),
+                        postageOverride !== null && e('div', { 
+                            style: { 
+                                marginTop: '18px', 
+                                padding: '16px',
+                                background: 'rgba(201,169,110,0.2)',
+                                borderRadius: '8px',
+                                color: '#c9a96e', 
+                                fontSize: '18px',
+                                fontWeight: 600 
+                            } 
+                        }, `✓ Active: All box sizes now cost £${postageOverride.toFixed(2)} for shipping`)
                     ),
                     
                     // Country selector for admin
