@@ -521,7 +521,7 @@
                     ),
                     
                     e('div', { className: 'form-group' },
-                        e('label', {}, 'Receipt Photo *'),
+                        e('label', {}, 'Receipt Photo'),
                         e('label', {
                             className: 'file-upload',
                             htmlFor: 'receipt-upload'
@@ -530,11 +530,10 @@
                                 type: 'file',
                                 id: 'receipt-upload',
                                 accept: 'image/*',
-                                required: true,
                                 onChange: handleFileChange
                             }),
                             e('div', { className: 'file-upload-text' },
-                                receiptFile ? '✓ File selected' : '📸 Click to upload receipt photo'
+                                receiptFile ? '✓ File selected' : '📸 Click to upload receipt photo (optional for now)'
                             ),
                             receiptFile && e('div', { className: 'file-name' }, receiptFile.name)
                         )
