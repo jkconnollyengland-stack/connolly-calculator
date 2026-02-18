@@ -6,11 +6,13 @@
     <title>Warehouse Orders Dashboard - Connolly</title>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script type="module">
-        // Firebase imports
-        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
-        import { getDatabase, ref, onValue, update } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
-        
+    
+    <!-- Firebase v9 - compat version -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
+    <script>
+        // Initialize Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDbd3uX-VfqtLm7v_jkzGzvFD5GFCf8eSw",
             authDomain: "swis-9b0ce.firebaseapp.com",
@@ -21,12 +23,10 @@
             appId: "1:25689930290:web:a5370855e0dd7104071a2b"
         };
         
-        const app = initializeApp(firebaseConfig);
-        window.firebaseDb = getDatabase(app);
-        window.firebaseRef = ref;
-        window.onValue = onValue;
-        window.firebaseUpdate = update;
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
     </script>
+    
     <style>
         * { box-sizing: border-box; }
         body {
@@ -309,16 +309,18 @@
             const [filter, setFilter] = useState('all'); // all, pending, processing, completed
             
             useEffect(() => {
-                const ordersRef = window.firebaseRef(window.firebaseDb, 'shipping-orders');
-                window.onValue(ordersRef, (snapshot) => {
+                const ordersRef = db.ref('shipping-orders');
+                ordersRef.on('value', (snapshot) => {
                     const data = snapshot.val() || {};
+                    console.log('Orders loaded:', Object.keys(data).length);
                     setOrders(data);
                 });
+                
+                return () => ordersRef.off();
             }, []);
             
             const updateOrderStatus = async (orderId, newStatus) => {
-                const orderRef = window.firebaseRef(window.firebaseDb, `shipping-orders/${orderId}`);
-                await window.firebaseUpdate(orderRef, { status: newStatus });
+                await db.ref(`shipping-orders/${orderId}`).update({ status: newStatus });
             };
             
             const formatDate = (isoString) => {
