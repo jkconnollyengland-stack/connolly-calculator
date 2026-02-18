@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Submit Shipping Order - Connolly</title>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script type="module">
+        // Firebase imports
+        import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js';
+        import { getDatabase, ref, push, set } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-database.js';
+        import { getStorage, ref as storageRef, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js';
+        
+        const firebaseConfig = {
+            apiKey: "AIzaSyDbd3uX-VfqtLm7v_jkzGzvFD5GFCf8eSw",
+            authDomain: "swis-9b0ce.firebaseapp.com",
+            databaseURL: "https://swis-9b0ce-default-rtdb.europe-west1.firebasedatabase.app",
+            projectId: "swis-9b0ce",
+            storageBucket: "swis-9b0ce.firebasestorage.app",
+            messagingSenderId: "25689930290",
+            appId: "1:25689930290:web:a5370855e0dd7104071a2b"
+        };
+        
+        const app = initializeApp(firebaseConfig);
+        window.firebaseDb = getDatabase(app);
+        window.firebaseStorage = getStorage(app);
+        window.firebaseRef = ref;
+        window.firebasePush = push;
+        window.firebaseSet = set;
+        window.storageRef = storageRef;
+        window.uploadBytes = uploadBytes;
+        window.getDownloadURL = getDownloadURL;
+    </script>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, sans-serif;
+            background: linear-gradient(135deg, #0f1724 0%, #1a2332 50%, #162030 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: rgba(255,255,255,0.04);
+            border-radius: 16px;
+            border: 1px solid rgba(201,169,110,0.2);
+            padding: 40px;
+        }
+        h1 {
+            color: #c9a96e;
+            font-size: 36px;
+            margin: 0 0 10px 0;
+            font-weight: 600;
+        }
+        h2 {
+            color: #c9a96e;
+            font-size: 24px;
+            margin: 30px 0 15px 0;
+            font-weight: 600;
+            border-bottom: 2px solid rgba(201,169,110,0.3);
+            padding-bottom: 10px;
+        }
+        .subtitle {
+            color: rgba(201,169,110,0.7);
+            font-size: 18px;
+            margin-bottom: 30px;
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        label {
+            display: block;
+            color: #c9a96e;
+            font-size: 18px;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="tel"],
+        textarea {
+            width: 100%;
+            padding: 14px 18px;
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(201,169,110,0.25);
+            border-radius: 8px;
+            color: #c9a96e;
+            font-size: 18px;
+            font-family: inherit;
+            outline: none;
+        }
+        textarea {
+            resize: vertical;
+            min-height: 100px;
+        }
+        input::placeholder,
+        textarea::placeholder {
+            color: rgba(201,169,110,0.4);
+        }
+        .radio-group {
+            display: flex;
+            gap: 30px;
+            margin-top: 10px;
+        }
+        .radio-option {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            cursor: pointer;
+        }
+        .radio-option input[type="radio"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+        .radio-option label {
+            margin: 0;
+            cursor: pointer;
+            font-size: 18px;
+        }
+        .file-upload {
+            padding: 20px;
+            background: rgba(201,169,110,0.08);
+            border: 2px dashed rgba(201,169,110,0.3);
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .file-upload:hover {
+            border-color: rgba(201,169,110,0.6);
+            background: rgba(201,169,110,0.12);
+        }
+        .file-upload input {
+            display: none;
+        }
+        .file-upload-text {
+            color: #c9a96e;
+            font-size: 16px;
+        }
+        .file-name {
+            margin-top: 10px;
+            color: #c9a96e;
+            font-size: 14px;
+            font-style: italic;
+        }
+        .summary-box {
+            background: rgba(201,169,110,0.1);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .summary-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            color: #c9a96e;
+            font-size: 18px;
+        }
+        .summary-row.total {
+            border-top: 2px solid rgba(201,169,110,0.3);
+            margin-top: 10px;
+            padding-top: 15px;
+            font-size: 24px;
+            font-weight: 700;
+        }
+        .btn {
+            width: 100%;
+            padding: 18px;
+            border: none;
+            border-radius: 12px;
+            font-size: 22px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            font-family: inherit;
+        }
+        .btn:active {
+            transform: scale(0.98);
+        }
+        .btn-primary {
+            background: #c9a96e;
+            color: #0f1724;
+            margin-top: 30px;
+        }
+        .btn-secondary {
+            background: rgba(255,255,255,0.1);
+            color: #c9a96e;
+            border: 1px solid rgba(201,169,110,0.3);
+            margin-top: 10px;
+        }
+        .success-message {
+            text-align: center;
+            padding: 60px 40px;
+        }
+        .success-icon {
+            font-size: 80px;
+            margin-bottom: 20px;
+        }
+        .success-title {
+            color: #c9a96e;
+            font-size: 32px;
+            margin-bottom: 15px;
+        }
+        .success-text {
+            color: rgba(201,169,110,0.8);
+            font-size: 18px;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    <script>
+        const { useState } = React;
+        const e = React.createElement;
+        
+        function App() {
+            const [submitted, setSubmitted] = useState(false);
+            const [submitting, setSubmitting] = useState(false);
+            
+            // Get calculation data from URL params
+            const params = new URLSearchParams(window.location.search);
+            const calcData = params.get('data') ? JSON.parse(decodeURIComponent(params.get('data'))) : null;
+            
+            // Form state
+            const [customerName, setCustomerName] = useState('');
+            const [addressLine1, setAddressLine1] = useState('');
+            const [addressLine2, setAddressLine2] = useState('');
+            const [addressLine3, setAddressLine3] = useState('');
+            const [addressLine4, setAddressLine4] = useState('');
+            const [postcode, setPostcode] = useState('');
+            const [phone, setPhone] = useState('');
+            const [email, setEmail] = useState('');
+            const [vatEori, setVatEori] = useState('');
+            const [dutyPaid, setDutyPaid] = useState('unpaid');
+            const [receiptFile, setReceiptFile] = useState(null);
+            const [staffMember, setStaffMember] = useState('');
+            const [additionalNotes, setAdditionalNotes] = useState('');
+            
+            const handleFileChange = (e) => {
+                if (e.target.files[0]) {
+                    setReceiptFile(e.target.files[0]);
+                }
+            };
+            
+            const handleSubmit = async (ev) => {
+                ev.preventDefault();
+                setSubmitting(true);
+                
+                try {
+                    let receiptUrl = null;
+                    
+                    // Upload receipt photo if provided
+                    if (receiptFile) {
+                        const timestamp = Date.now();
+                        const fileName = `receipts/${timestamp}_${receiptFile.name}`;
+                        const fileRef = window.storageRef(window.firebaseStorage, fileName);
+                        await window.uploadBytes(fileRef, receiptFile);
+                        receiptUrl = await window.getDownloadURL(fileRef);
+                    }
+                    
+                    // Create order object
+                    const order = {
+                        timestamp: new Date().toISOString(),
+                        customer: {
+                            name: customerName,
+                            address: {
+                                line1: addressLine1,
+                                line2: addressLine2,
+                                line3: addressLine3,
+                                line4: addressLine4,
+                                postcode: postcode
+                            },
+                            phone,
+                            email,
+                            vatEori: vatEori || null
+                        },
+                        calculation: calcData,
+                        dutyPaid: dutyPaid === 'paid',
+                        receiptUrl,
+                        staffMember,
+                        additionalNotes,
+                        status: 'pending'
+                    };
+                    
+                    // Save to Firebase
+                    const ordersRef = window.firebaseRef(window.firebaseDb, 'shipping-orders');
+                    const newOrderRef = window.firebasePush(ordersRef);
+                    await window.firebaseSet(newOrderRef, order);
+                    
+                    setSubmitted(true);
+                } catch (error) {
+                    console.error('Error submitting order:', error);
+                    alert('Error submitting order. Please try again.');
+                    setSubmitting(false);
+                }
+            };
+            
+            if (!calcData) {
+                return e('div', { className: 'container' },
+                    e('h1', {}, 'No Calculation Data'),
+                    e('p', { style: { color: '#c9a96e', fontSize: '18px' } }, 
+                        'Please return to the calculator and complete a calculation first.'
+                    ),
+                    e('button', {
+                        className: 'btn btn-secondary',
+                        onClick: () => window.location.href = 'index.html'
+                    }, '← Back to Calculator')
+                );
+            }
+            
+            if (submitted) {
+                return e('div', { className: 'container' },
+                    e('div', { className: 'success-message' },
+                        e('div', { className: 'success-icon' }, '✓'),
+                        e('div', { className: 'success-title' }, 'Order Submitted Successfully!'),
+                        e('div', { className: 'success-text' }, 
+                            'The warehouse team has been notified and will process this shipping order shortly.'
+                        ),
+                        e('button', {
+                            className: 'btn btn-primary',
+                            style: { marginTop: '40px', maxWidth: '400px' },
+                            onClick: () => window.location.href = 'index.html'
+                        }, 'Submit Another Order')
+                    )
+                );
+            }
+            
+            return e('div', { className: 'container' },
+                e('h1', {}, 'Submit Shipping Order'),
+                e('div', { className: 'subtitle' }, 'Complete the form below to send this order to the warehouse'),
+                
+                // Calculation Summary
+                e('div', { className: 'summary-box' },
+                    e('h2', { style: { marginTop: 0 } }, 'Order Summary'),
+                    e('div', { className: 'summary-row' },
+                        e('span', {}, 'Destination:'),
+                        e('strong', {}, calcData.country)
+                    ),
+                    e('div', { className: 'summary-row' },
+                        e('span', {}, 'Total Goods:'),
+                        e('span', {}, '£' + calcData.totalGoods.toFixed(2))
+                    ),
+                    e('div', { className: 'summary-row' },
+                        e('span', {}, 'Total Duty:'),
+                        e('span', {}, '£' + calcData.totalDuty.toFixed(2))
+                    ),
+                    e('div', { className: 'summary-row' },
+                        e('span', {}, 'Total Tax:'),
+                        e('span', {}, '£' + calcData.totalTax.toFixed(2))
+                    ),
+                    e('div', { className: 'summary-row' },
+                        e('span', {}, 'Handling Fee:'),
+                        e('span', {}, '£' + calcData.handlingFee.toFixed(2))
+                    ),
+                    e('div', { className: 'summary-row total' },
+                        e('span', {}, 'Total Before Shipping:'),
+                        e('span', {}, '£' + calcData.grandTotal.toFixed(2))
+                    ),
+                    e('div', { className: 'summary-row' },
+                        e('span', {}, 'Shipping (' + calcData.boxSize + '):'),
+                        e('span', {}, '£' + calcData.shippingCost.toFixed(2))
+                    ),
+                    e('div', { className: 'summary-row total' },
+                        e('span', {}, 'TOTAL INCLUDING SHIPPING:'),
+                        e('span', {}, '£' + (calcData.grandTotal + calcData.shippingCost).toFixed(2))
+                    )
+                ),
+                
+                // Customer Details Form
+                e('form', { onSubmit: handleSubmit },
+                    e('h2', {}, 'Customer Details'),
+                    
+                    e('div', { className: 'form-group' },
+                        e('label', {}, 'Customer Name *'),
+                        e('input', {
+                            type: 'text',
+                            required: true,
+                            value: customerName,
+                            onChange: (ev) => setCustomerName(ev.target.value),
+                            placeholder: 'Full name'
+                        })
+                    ),
+                    
+                    e('div', { className: 'form-group' },
+                        e('label', {}, 'Address Line 1 *'),
+                        e('input', {
+                            type: 'text',
+                            required: true,
+                            value: addressLine1,
+                            onChange: (ev) => setAddressLine1(ev.target.value),
+                            placeholder: 'Street address'
+                        })
+                    ),
+                    
+                    e('div', { className: 'form-group' },
+                        e('label', {}, 'Address Line 2'),
+                        e('input', {
+                            type: 'text',
+                            value: addressLine2,
+                            onChange: (ev) => setAddressLine2(ev.target.value),
+                            placeholder: 'Apartment, suite, etc. (optional)'
+                        })
+                    ),
+                    
+                    e('div', { className: 'form-group' },
+                        e('label', {}, 'City *'),
+                        e('input', {
+                            type: 'text',
+                            required: true,
+                            value: addressLine3,
+                            onChange: (ev) => setAddressLine3(ev.target.value),
+                            placeholder: 'City'
+                        })
+                    ),
+                    
+                    e('div', { className: 'form-group' },
+                        e('label', {}, 'State/Province/Region'),
+                        e('input', {
+                            type: 'text',
+                            value: addressLine4,
+                            onChange: (ev) => setAddressLine4(ev.target.value),
+                            placeholder: 'State/Province/Region (if applicable)'
+                        })
+                    ),
+                    
+                    e('div', { className: 'form-group' },
+                        e('label', {}, 'Postcode/Zip Code *'),
+                        e('input', {
+                            type: 'text',
+                            required: true,
+                            value: postcode,
+                            onChange: (ev) => setPostcode(ev.target.value),
+                            placeholder: 'Postcode'
+                        })
+                    ),
+                    
+                    e('div', { className: 'form-group' },
+                        e('label', {}, 'Phone Number *'),
+                        e('input', {
+                            type: 'tel',
+                            required: true,
+                            value: phone,
+                            onChange: (ev) => setPhone(ev.target.value),
+                            placeholder: '+44 7700 900000'
+                        })
+                    ),
+                    
+                    e('div', { className: 'form-group' },
+                        e('label', {}, 'Email Address *'),
+                        e('input', {
+                            type: 'email',
+                            required: true,
+                            value: email,
+                            onChange: (ev) => setEmail(ev.target.value),
+                            placeholder: 'customer@example.com'
+                        })
+                    ),
+                    
+                    e('div', { className: 'form-group' },
+                        e('label', {}, 'VAT/EORI Number (for business deliveries)'),
+                        e('input', {
+                            type: 'text',
+                            value: vatEori,
+                            onChange: (ev) => setVatEori(ev.target.value),
+                            placeholder: 'Optional'
+                        })
+                    ),
+                    
+                    e('h2', {}, 'Shipping Details'),
+                    
+                    e('div', { className: 'form-group' },
+                        e('label', {}, 'Duty Payment *'),
+                        e('div', { className: 'radio-group' },
+                            e('div', { className: 'radio-option' },
+                                e('input', {
+                                    type: 'radio',
+                                    id: 'duty-paid',
+                                    name: 'duty',
+                                    value: 'paid',
+                                    checked: dutyPaid === 'paid',
+                                    onChange: (ev) => setDutyPaid(ev.target.value)
+                                }),
+                                e('label', { htmlFor: 'duty-paid' }, 'Duty Paid (we pay)')
+                            ),
+                            e('div', { className: 'radio-option' },
+                                e('input', {
+                                    type: 'radio',
+                                    id: 'duty-unpaid',
+                                    name: 'duty',
+                                    value: 'unpaid',
+                                    checked: dutyPaid === 'unpaid',
+                                    onChange: (ev) => setDutyPaid(ev.target.value)
+                                }),
+                                e('label', { htmlFor: 'duty-unpaid' }, 'Duty Unpaid (customer pays on arrival)')
+                            )
+                        )
+                    ),
+                    
+                    e('div', { className: 'form-group' },
+                        e('label', {}, 'Receipt Photo *'),
+                        e('label', {
+                            className: 'file-upload',
+                            htmlFor: 'receipt-upload'
+                        },
+                            e('input', {
+                                type: 'file',
+                                id: 'receipt-upload',
+                                accept: 'image/*',
+                                required: true,
+                                onChange: handleFileChange
+                            }),
+                            e('div', { className: 'file-upload-text' },
+                                receiptFile ? '✓ File selected' : '📸 Click to upload receipt photo'
+                            ),
+                            receiptFile && e('div', { className: 'file-name' }, receiptFile.name)
+                        )
+                    ),
+                    
+                    e('div', { className: 'form-group' },
+                        e('label', {}, 'Staff Member *'),
+                        e('input', {
+                            type: 'text',
+                            required: true,
+                            value: staffMember,
+                            onChange: (ev) => setStaffMember(ev.target.value),
+                            placeholder: 'Your name'
+                        })
+                    ),
+                    
+                    e('div', { className: 'form-group' },
+                        e('label', {}, 'Additional Notes'),
+                        e('textarea', {
+                            value: additionalNotes,
+                            onChange: (ev) => setAdditionalNotes(ev.target.value),
+                            placeholder: 'Special instructions for warehouse (optional)'
+                        })
+                    ),
+                    
+                    e('button', {
+                        type: 'submit',
+                        className: 'btn btn-primary',
+                        disabled: submitting
+                    }, submitting ? 'Submitting...' : 'Submit Order to Warehouse'),
+                    
+                    e('button', {
+                        type: 'button',
+                        className: 'btn btn-secondary',
+                        onClick: () => window.location.href = 'index.html'
+                    }, 'Cancel')
+                )
+            );
+        }
+        
+        ReactDOM.render(e(App), document.getElementById('root'));
+    </script>
+</body>
+</html>
