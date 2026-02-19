@@ -357,24 +357,20 @@
         /* ===================== */
         /* PRINT STYLES          */
         /* ===================== */
-        @media print {
-            /* Hide everything by default */
-            body * { visibility: hidden; }
+@media print {
+    /* Hide all order cards except the one being printed */
+    .order-card-wrapper:not(.printing-this) { display: none !important; }
 
-            /* Show only the targeted print card */
-            .printing-this, .printing-this * { visibility: visible; }
+    /* Also hide the header, filters, stats */
+    .header { display: none !important; }
+    .filters { display: none !important; }
 
-            /* Position the card to fill the page */
-            .printing-this {
-                position: fixed !important;
-                top: 0 !important;
-                left: 0 !important;
-                width: 100% !important;
-                padding: 20px !important;
-                margin: 0 !important;
-                border: none !important;
-                border-radius: 0 !important;
-            }
+    /* Clean up the card being printed */
+    .printing-this {
+        margin: 0 !important;
+        border: none !important;
+        border-radius: 0 !important;
+    }
 
             /* White background, dark text for print */
             body { background: white !important; }
