@@ -219,7 +219,8 @@
             border: 2px solid rgba(201,169,110,0.2);
         }
         .receipt-preview:hover {
-            transform: scale(1.02);
+            transform: scale(1.05);
+            border-color: rgba(201,169,110,0.6);
         }
         .no-receipt {
             color: rgba(201,169,110,0.5);
@@ -253,6 +254,14 @@
             background: rgba(76, 175, 80, 0.3);
             color: #4CAF50;
             border: 1px solid rgba(76, 175, 80, 0.4);
+        }
+        .btn-print {
+            background: rgba(255,255,255,0.08);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .btn-print:hover {
+            background: rgba(255,255,255,0.15);
         }
         .btn:hover {
             transform: translateY(-2px);
@@ -338,23 +347,98 @@
             font-weight: 600;
             cursor: pointer;
         }
-        .receipt-preview {
-            width: 100%;
-            max-width: 300px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: transform 0.2s;
-            border: 2px solid rgba(201,169,110,0.2);
-        }
-        .receipt-preview:hover {
-            transform: scale(1.05);
-            border-color: rgba(201,169,110,0.6);
-        }
         .receipt-hint {
             font-size: 12px;
             color: rgba(201,169,110,0.6);
             margin-top: 6px;
             font-style: italic;
+        }
+
+        /* ===================== */
+        /* PRINT STYLES          */
+        /* ===================== */
+        @media print {
+            /* Hide everything by default */
+            body * { visibility: hidden; }
+
+            /* Show only the targeted print card */
+            .printing-this, .printing-this * { visibility: visible; }
+
+            /* Position the card to fill the page */
+            .printing-this {
+                position: fixed !important;
+                top: 0 !important;
+                left: 0 !important;
+                width: 100% !important;
+                padding: 20px !important;
+                margin: 0 !important;
+                border: none !important;
+                border-radius: 0 !important;
+            }
+
+            /* White background, dark text for print */
+            body { background: white !important; }
+
+            .printing-this .order-card,
+            .printing-this { background: white !important; color: #000 !important; }
+
+            .printing-this .section { background: #f5f5f5 !important; border: 1px solid #ddd !important; }
+            .printing-this .section-title { color: #1a2332 !important; }
+            .printing-this .customer-name { color: #1a2332 !important; }
+            .printing-this .order-timestamp { color: #1a2332 !important; }
+            .printing-this .order-id { color: #666 !important; }
+            .printing-this .info-label { color: #555 !important; }
+            .printing-this .info-value { color: #000 !important; }
+            .printing-this .address-line { color: #333 !important; }
+            .printing-this .notes { background: #f9f9f9 !important; color: #333 !important; border-left-color: #1a2332 !important; }
+            .printing-this .info-row { border-bottom-color: #ddd !important; }
+            
+            /* Status badge — print-friendly */
+            .printing-this .status-pending { background: #fff8e1 !important; color: #7c5900 !important; border-color: #ccc !important; }
+            .printing-this .status-processing { background: #e3f2fd !important; color: #0d47a1 !important; border-color: #ccc !important; }
+            .printing-this .status-completed { background: #e8f5e9 !important; color: #1b5e20 !important; border-color: #ccc !important; }
+
+            .printing-this .duty-paid { background: #e8f5e9 !important; color: #1b5e20 !important; }
+            .printing-this .duty-unpaid { background: #fff3e0 !important; color: #7c4200 !important; }
+
+            /* Tracking box */
+            .printing-this [style*="rgba(33, 150, 243"] {
+                background: #f0f6ff !important;
+                border-color: #90caf9 !important;
+            }
+
+            /* Item detail boxes */
+            .printing-this [style*="rgba(255,255,255,0.02)"] {
+                background: #fafafa !important;
+                border-color: #ddd !important;
+            }
+
+            /* Hide buttons and receipt image in print */
+            .printing-this .action-buttons { display: none !important; }
+            .printing-this .receipt-preview { display: none !important; }
+            .printing-this .receipt-hint { display: none !important; }
+
+            /* Print header */
+            .print-header { display: block !important; }
+        }
+
+        /* Hide print header on screen */
+        .print-header {
+            display: none;
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #1a2332;
+        }
+        .print-header h2 {
+            margin: 0 0 4px;
+            font-size: 24px;
+            color: #1a2332;
+        }
+        .print-header p {
+            margin: 0;
+            font-size: 13px;
+            color: #666;
         }
     </style>
 </head>
@@ -363,20 +447,31 @@
     <script>
         const { useState, useEffect } = React;
         const e = React.createElement;
+
+        function printOrder(orderId) {
+            // Add the printing-this class to just this card
+            const allCards = document.querySelectorAll('.order-card-wrapper');
+            allCards.forEach(card => card.classList.remove('printing-this'));
+            const target = document.getElementById('order-' + orderId);
+            if (target) {
+                target.classList.add('printing-this');
+                window.print();
+                // Clean up after print dialog closes
+                setTimeout(() => target.classList.remove('printing-this'), 1000);
+            }
+        }
         
         function App() {
             const [orders, setOrders] = useState({});
-            const [filter, setFilter] = useState('all'); // all, pending, processing, completed
+            const [filter, setFilter] = useState('all');
             const [modalImage, setModalImage] = useState(null);
             
             useEffect(() => {
                 const ordersRef = db.ref('shipping-orders');
                 ordersRef.on('value', (snapshot) => {
                     const data = snapshot.val() || {};
-                    console.log('Orders loaded:', Object.keys(data).length);
                     setOrders(data);
                 });
-                
                 return () => ordersRef.off();
             }, []);
             
@@ -387,30 +482,20 @@
             const formatDate = (isoString) => {
                 const date = new Date(isoString);
                 return date.toLocaleString('en-GB', {
-                    day: '2-digit',
-                    month: 'short',
-                    year: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
+                    day: '2-digit', month: 'short', year: 'numeric',
+                    hour: '2-digit', minute: '2-digit'
                 });
             };
             
-            const formatCurrency = (amount) => {
-                return '£' + amount.toFixed(2);
-            };
+            const formatCurrency = (amount) => '£' + amount.toFixed(2);
             
-            // Filter orders
             const filteredOrders = Object.entries(orders).filter(([id, order]) => {
                 if (filter === 'all') return true;
                 return order.status === filter;
             });
             
-            // Sort by timestamp (newest first)
-            filteredOrders.sort((a, b) => {
-                return new Date(b[1].timestamp) - new Date(a[1].timestamp);
-            });
+            filteredOrders.sort((a, b) => new Date(b[1].timestamp) - new Date(a[1].timestamp));
             
-            // Calculate stats
             const stats = {
                 total: Object.keys(orders).length,
                 pending: Object.values(orders).filter(o => o.status === 'pending').length,
@@ -445,238 +530,200 @@
                 e('div', { className: 'container' },
                     // Filters
                     e('div', { className: 'filters' },
-                        e('button', {
-                            className: 'filter-btn' + (filter === 'all' ? ' active' : ''),
-                            onClick: () => setFilter('all')
-                        }, 'All Orders'),
-                        e('button', {
-                            className: 'filter-btn' + (filter === 'pending' ? ' active' : ''),
-                            onClick: () => setFilter('pending')
-                        }, 'Pending'),
-                        e('button', {
-                            className: 'filter-btn' + (filter === 'processing' ? ' active' : ''),
-                            onClick: () => setFilter('processing')
-                        }, 'Processing'),
-                        e('button', {
-                            className: 'filter-btn' + (filter === 'completed' ? ' active' : ''),
-                            onClick: () => setFilter('completed')
-                        }, 'Completed')
+                        e('button', { className: 'filter-btn' + (filter === 'all' ? ' active' : ''), onClick: () => setFilter('all') }, 'All Orders'),
+                        e('button', { className: 'filter-btn' + (filter === 'pending' ? ' active' : ''), onClick: () => setFilter('pending') }, 'Pending'),
+                        e('button', { className: 'filter-btn' + (filter === 'processing' ? ' active' : ''), onClick: () => setFilter('processing') }, 'Processing'),
+                        e('button', { className: 'filter-btn' + (filter === 'completed' ? ' active' : ''), onClick: () => setFilter('completed') }, 'Completed')
                     ),
                     
-                    // Orders Grid
-                    filteredOrders.length === 0 ? 
+                    // Orders
+                    filteredOrders.length === 0 ?
                         e('div', { className: 'empty-state' },
                             e('div', { className: 'empty-icon' }, '📭'),
-                            e('div', { className: 'empty-text' }, 
-                                filter === 'all' ? 'No orders yet' : `No ${filter} orders`
-                            )
+                            e('div', { className: 'empty-text' }, filter === 'all' ? 'No orders yet' : `No ${filter} orders`)
                         )
                     :
                     e('div', { className: 'orders-grid' },
-                        filteredOrders.map(([orderId, order]) => 
-                            e('div', { key: orderId, className: 'order-card' },
-                                // Header
-                                e('div', { className: 'order-header' },
-                                    e('div', {},
-                                        e('div', { className: 'order-timestamp' }, formatDate(order.timestamp)),
-                                        e('div', { className: 'order-id' }, 'Order ID: ' + orderId.slice(0, 8))
-                                    ),
-                                    e('span', { 
-                                        className: 'status-badge status-' + order.status 
-                                    }, order.status)
+                        filteredOrders.map(([orderId, order]) =>
+                            e('div', { key: orderId, id: 'order-' + orderId, className: 'order-card-wrapper' },
+
+                                // Print header (only shows when printing)
+                                e('div', { className: 'print-header' },
+                                    e('h2', {}, 'Connolly — Order Sheet'),
+                                    e('p', {}, 'Printed: ' + new Date().toLocaleString('en-GB'))
                                 ),
-                                
-                                // Body
-                                e('div', { className: 'order-body' },
-                                    // Customer Details
-                                    e('div', { className: 'section' },
-                                        e('div', { className: 'section-title' }, 'Customer'),
-                                        e('div', { className: 'customer-name' }, order.customer.name),
-                                        e('div', { className: 'address-line' }, order.customer.address.line1),
-                                        order.customer.address.line2 && e('div', { className: 'address-line' }, order.customer.address.line2),
-                                        e('div', { className: 'address-line' }, order.customer.address.line3),
-                                        order.customer.address.line4 && e('div', { className: 'address-line' }, order.customer.address.line4),
-                                        e('div', { className: 'address-line' }, order.customer.address.postcode),
-                                        e('div', { className: 'info-row', style: { marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(201,169,110,0.2)' } },
-                                            e('span', { className: 'info-label' }, 'Phone:'),
-                                            e('span', { className: 'info-value' }, order.customer.phone)
+
+                                e('div', { className: 'order-card' },
+                                    // Order header
+                                    e('div', { className: 'order-header' },
+                                        e('div', {},
+                                            e('div', { className: 'order-timestamp' }, formatDate(order.timestamp)),
+                                            e('div', { className: 'order-id' }, 'Order ID: ' + orderId.slice(0, 8))
                                         ),
-                                        e('div', { className: 'info-row' },
-                                            e('span', { className: 'info-label' }, 'Email:'),
-                                            e('span', { className: 'info-value', style: { fontSize: '13px' } }, order.customer.email)
-                                        ),
-                                        order.customer.vatEori && e('div', { className: 'info-row' },
-                                            e('span', { className: 'info-label' }, 'VAT/EORI:'),
-                                            e('span', { className: 'info-value' }, order.customer.vatEori)
-                                        )
+                                        e('span', { className: 'status-badge status-' + order.status }, order.status)
                                     ),
                                     
-                                    // Calculation
-                                    e('div', { className: 'section' },
-                                        e('div', { className: 'section-title' }, 'Calculation'),
-                                        e('div', { className: 'info-row' },
-                                            e('span', { className: 'info-label' }, 'Destination:'),
-                                            e('strong', { className: 'info-value' }, order.calculation.country)
-                                        ),
-                                        e('div', { className: 'info-row' },
-                                            e('span', { className: 'info-label' }, 'Total Goods:'),
-                                            e('span', { className: 'info-value' }, formatCurrency(order.calculation.totalGoods))
-                                        ),
-                                        e('div', { className: 'info-row' },
-                                            e('span', { className: 'info-label' }, 'Duty:'),
-                                            e('span', { className: 'info-value' }, formatCurrency(order.calculation.totalDuty))
-                                        ),
-                                        e('div', { className: 'info-row' },
-                                            e('span', { className: 'info-label' }, 'Tax:'),
-                                            e('span', { className: 'info-value' }, formatCurrency(order.calculation.totalTax))
-                                        ),
-                                        e('div', { className: 'info-row' },
-                                            e('span', { className: 'info-label' }, 'Handling:'),
-                                            e('span', { className: 'info-value' }, formatCurrency(order.calculation.handlingFee))
-                                        ),
-                                        e('div', { className: 'info-row', style: { borderTop: '2px solid rgba(201,169,110,0.3)', marginTop: '8px', paddingTop: '8px' } },
-                                            e('strong', { className: 'info-label' }, 'Before Shipping:'),
-                                            e('strong', { className: 'info-value', style: { fontSize: '18px' } }, formatCurrency(order.calculation.grandTotal))
-                                        ),
-                                        e('div', { className: 'info-row' },
-                                            e('span', { className: 'info-label' }, 'Shipping (' + order.calculation.boxSize + '):'),
-                                            e('span', { className: 'info-value' }, formatCurrency(order.calculation.shippingCost))
-                                        ),
-                                        e('div', { className: 'info-row', style: { borderTop: '2px solid rgba(201,169,110,0.3)', marginTop: '8px', paddingTop: '8px' } },
-                                            e('strong', { className: 'info-label' }, 'TOTAL:'),
-                                            e('strong', { className: 'info-value', style: { fontSize: '20px', color: '#c9a96e' } }, 
-                                                formatCurrency(order.calculation.grandTotal + order.calculation.shippingCost))
-                                        )
-                                    ),
-                                    
-                                    // Shipping Details
-                                    e('div', { className: 'section' },
-                                        e('div', { className: 'section-title' }, 'Shipping Details'),
-                                        e('div', { className: 'info-row' },
-                                            e('span', { className: 'info-label' }, 'Staff Member:'),
-                                            e('span', { className: 'info-value' }, order.staffMember)
-                                        ),
-                                        e('div', { className: 'info-row' },
-                                            e('span', { className: 'info-label' }, 'Duty Payment:'),
-                                            e('span', { className: 'duty-badge ' + (order.dutyPaid ? 'duty-paid' : 'duty-unpaid') }, 
-                                                order.dutyPaid ? 'PAID' : 'UNPAID')
+                                    // Body
+                                    e('div', { className: 'order-body' },
+                                        // Customer
+                                        e('div', { className: 'section' },
+                                            e('div', { className: 'section-title' }, 'Customer'),
+                                            e('div', { className: 'customer-name' }, order.customer.name),
+                                            e('div', { className: 'address-line' }, order.customer.address.line1),
+                                            order.customer.address.line2 && e('div', { className: 'address-line' }, order.customer.address.line2),
+                                            e('div', { className: 'address-line' }, order.customer.address.line3),
+                                            order.customer.address.line4 && e('div', { className: 'address-line' }, order.customer.address.line4),
+                                            e('div', { className: 'address-line' }, order.customer.address.postcode),
+                                            e('div', { className: 'info-row', style: { marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(201,169,110,0.2)' } },
+                                                e('span', { className: 'info-label' }, 'Phone:'),
+                                                e('span', { className: 'info-value' }, order.customer.phone)
+                                            ),
+                                            e('div', { className: 'info-row' },
+                                                e('span', { className: 'info-label' }, 'Email:'),
+                                                e('span', { className: 'info-value', style: { fontSize: '13px' } }, order.customer.email)
+                                            ),
+                                            order.customer.vatEori && e('div', { className: 'info-row' },
+                                                e('span', { className: 'info-label' }, 'VAT/EORI:'),
+                                                e('span', { className: 'info-value' }, order.customer.vatEori)
+                                            )
                                         ),
                                         
-                                        // Tracking Number
-                                        e('div', { style: { marginTop: '15px', padding: '12px', background: 'rgba(33, 150, 243, 0.1)', borderRadius: '8px', border: '1px solid rgba(33, 150, 243, 0.3)' } },
-                                            e('div', { className: 'info-label', style: { marginBottom: '8px' } }, '📦 Tracking Number:'),
-                                            order.trackingNumber ? 
-                                                e('div', {},
-                                                    e('a', { 
-                                                        href: order.trackingNumber, 
-                                                        target: '_blank',
-                                                        style: { color: '#2196F3', fontSize: '14px', wordBreak: 'break-all' }
-                                                    }, order.trackingNumber),
+                                        // Calculation
+                                        e('div', { className: 'section' },
+                                            e('div', { className: 'section-title' }, 'Calculation'),
+                                            e('div', { className: 'info-row' },
+                                                e('span', { className: 'info-label' }, 'Destination:'),
+                                                e('strong', { className: 'info-value' }, order.calculation.country)
+                                            ),
+                                            e('div', { className: 'info-row' },
+                                                e('span', { className: 'info-label' }, 'Total Goods:'),
+                                                e('span', { className: 'info-value' }, formatCurrency(order.calculation.totalGoods))
+                                            ),
+                                            e('div', { className: 'info-row' },
+                                                e('span', { className: 'info-label' }, 'Duty:'),
+                                                e('span', { className: 'info-value' }, formatCurrency(order.calculation.totalDuty))
+                                            ),
+                                            e('div', { className: 'info-row' },
+                                                e('span', { className: 'info-label' }, 'Tax:'),
+                                                e('span', { className: 'info-value' }, formatCurrency(order.calculation.totalTax))
+                                            ),
+                                            e('div', { className: 'info-row' },
+                                                e('span', { className: 'info-label' }, 'Handling:'),
+                                                e('span', { className: 'info-value' }, formatCurrency(order.calculation.handlingFee))
+                                            ),
+                                            e('div', { className: 'info-row', style: { borderTop: '2px solid rgba(201,169,110,0.3)', marginTop: '8px', paddingTop: '8px' } },
+                                                e('strong', { className: 'info-label' }, 'Before Shipping:'),
+                                                e('strong', { className: 'info-value', style: { fontSize: '18px' } }, formatCurrency(order.calculation.grandTotal))
+                                            ),
+                                            e('div', { className: 'info-row' },
+                                                e('span', { className: 'info-label' }, 'Shipping (' + order.calculation.boxSize + '):'),
+                                                e('span', { className: 'info-value' }, formatCurrency(order.calculation.shippingCost))
+                                            ),
+                                            e('div', { className: 'info-row', style: { borderTop: '2px solid rgba(201,169,110,0.3)', marginTop: '8px', paddingTop: '8px' } },
+                                                e('strong', { className: 'info-label' }, 'TOTAL:'),
+                                                e('strong', { className: 'info-value', style: { fontSize: '20px', color: '#c9a96e' } },
+                                                    formatCurrency(order.calculation.grandTotal + order.calculation.shippingCost))
+                                            )
+                                        ),
+                                        
+                                        // Shipping Details
+                                        e('div', { className: 'section' },
+                                            e('div', { className: 'section-title' }, 'Shipping Details'),
+                                            e('div', { className: 'info-row' },
+                                                e('span', { className: 'info-label' }, 'Staff Member:'),
+                                                e('span', { className: 'info-value' }, order.staffMember)
+                                            ),
+                                            e('div', { className: 'info-row' },
+                                                e('span', { className: 'info-label' }, 'Duty Payment:'),
+                                                e('span', { className: 'duty-badge ' + (order.dutyPaid ? 'duty-paid' : 'duty-unpaid') },
+                                                    order.dutyPaid ? 'PAID' : 'UNPAID')
+                                            ),
+                                            
+                                            // Tracking
+                                            e('div', { style: { marginTop: '15px', padding: '12px', background: 'rgba(33, 150, 243, 0.1)', borderRadius: '8px', border: '1px solid rgba(33, 150, 243, 0.3)' } },
+                                                e('div', { className: 'info-label', style: { marginBottom: '8px' } }, '📦 Tracking Number:'),
+                                                order.trackingNumber ?
+                                                    e('div', {},
+                                                        e('a', {
+                                                            href: order.trackingNumber,
+                                                            target: '_blank',
+                                                            style: { color: '#2196F3', fontSize: '14px', wordBreak: 'break-all' }
+                                                        }, order.trackingNumber),
+                                                        e('button', {
+                                                            onClick: () => {
+                                                                const newTracking = prompt('Update tracking number:', order.trackingNumber);
+                                                                if (newTracking !== null) db.ref(`shipping-orders/${orderId}`).update({ trackingNumber: newTracking });
+                                                            },
+                                                            style: { marginTop: '8px', padding: '6px 12px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(201,169,110,0.3)', borderRadius: '6px', color: '#c9a96e', cursor: 'pointer', fontSize: '12px' }
+                                                        }, 'Update')
+                                                    )
+                                                :
                                                     e('button', {
                                                         onClick: () => {
-                                                            const newTracking = prompt('Update tracking number:', order.trackingNumber);
-                                                            if (newTracking !== null) {
-                                                                db.ref(`shipping-orders/${orderId}`).update({ trackingNumber: newTracking });
-                                                            }
+                                                            const tracking = prompt('Enter tracking URL:');
+                                                            if (tracking) db.ref(`shipping-orders/${orderId}`).update({ trackingNumber: tracking });
                                                         },
-                                                        style: {
-                                                            marginTop: '8px',
-                                                            padding: '6px 12px',
-                                                            background: 'rgba(255,255,255,0.1)',
-                                                            border: '1px solid rgba(201,169,110,0.3)',
-                                                            borderRadius: '6px',
-                                                            color: '#c9a96e',
-                                                            cursor: 'pointer',
-                                                            fontSize: '12px'
-                                                        }
-                                                    }, 'Update')
-                                                )
-                                            :
-                                                e('button', {
-                                                    onClick: () => {
-                                                        const tracking = prompt('Enter tracking URL:');
-                                                        if (tracking) {
-                                                            db.ref(`shipping-orders/${orderId}`).update({ trackingNumber: tracking });
-                                                        }
+                                                        style: { padding: '10px 16px', background: '#2196F3', border: 'none', borderRadius: '6px', color: 'white', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }
+                                                    }, '+ Add Tracking Number')
+                                            ),
+                                            
+                                            // Item Details
+                                            order.itemDetails && order.itemDetails.length > 0 && e('div', { style: { marginTop: '15px' } },
+                                                e('div', { className: 'info-label', style: { marginBottom: '10px', fontSize: '16px', fontWeight: 600 } }, 'Items for Customs:'),
+                                                order.itemDetails.map((item, idx) =>
+                                                    e('div', {
+                                                        key: idx,
+                                                        style: { background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '6px', marginBottom: '8px', border: '1px solid rgba(201,169,110,0.15)' }
                                                     },
-                                                    style: {
-                                                        padding: '10px 16px',
-                                                        background: '#2196F3',
-                                                        border: 'none',
-                                                        borderRadius: '6px',
-                                                        color: 'white',
-                                                        cursor: 'pointer',
-                                                        fontSize: '14px',
-                                                        fontWeight: 600
-                                                    }
-                                                }, '+ Add Tracking Number')
-                                        ),
-                                        
-                                        // Item Details
-                                        order.itemDetails && order.itemDetails.length > 0 && e('div', { style: { marginTop: '15px' } },
-                                            e('div', { className: 'info-label', style: { marginBottom: '10px', fontSize: '16px', fontWeight: 600 } }, 'Items for Customs:'),
-                                            order.itemDetails.map((item, idx) =>
-                                                e('div', {
-                                                    key: idx,
-                                                    style: {
-                                                        background: 'rgba(255,255,255,0.02)',
-                                                        padding: '10px',
-                                                        borderRadius: '6px',
-                                                        marginBottom: '8px',
-                                                        border: '1px solid rgba(201,169,110,0.15)'
-                                                    }
-                                                },
-                                                    item.description && e('div', { style: { marginBottom: '4px' } },
-                                                        e('strong', { style: { color: 'rgba(201,169,110,0.9)', fontSize: '13px' } }, 'Description: '),
-                                                        e('span', { style: { color: 'rgba(201,169,110,0.7)', fontSize: '13px' } }, item.description)
-                                                    ),
-                                                    item.composition && e('div', { style: { marginBottom: '4px' } },
-                                                        e('strong', { style: { color: 'rgba(201,169,110,0.9)', fontSize: '13px' } }, 'Composition: '),
-                                                        e('span', { style: { color: 'rgba(201,169,110,0.7)', fontSize: '13px' } }, item.composition)
-                                                    ),
-                                                    item.origin && e('div', {},
-                                                        e('strong', { style: { color: 'rgba(201,169,110,0.9)', fontSize: '13px' } }, 'Origin: '),
-                                                        e('span', { style: { color: 'rgba(201,169,110,0.7)', fontSize: '13px' } }, item.origin)
+                                                        item.description && e('div', { style: { marginBottom: '4px' } },
+                                                            e('strong', { style: { color: 'rgba(201,169,110,0.9)', fontSize: '13px' } }, 'Description: '),
+                                                            e('span', { style: { color: 'rgba(201,169,110,0.7)', fontSize: '13px' } }, item.description)
+                                                        ),
+                                                        item.composition && e('div', { style: { marginBottom: '4px' } },
+                                                            e('strong', { style: { color: 'rgba(201,169,110,0.9)', fontSize: '13px' } }, 'Composition: '),
+                                                            e('span', { style: { color: 'rgba(201,169,110,0.7)', fontSize: '13px' } }, item.composition)
+                                                        ),
+                                                        item.origin && e('div', {},
+                                                            e('strong', { style: { color: 'rgba(201,169,110,0.9)', fontSize: '13px' } }, 'Origin: '),
+                                                            e('span', { style: { color: 'rgba(201,169,110,0.7)', fontSize: '13px' } }, item.origin)
+                                                        )
                                                     )
                                                 )
-                                            )
-                                        ),
-                                        
-                                        order.receiptUrl && e('div', { style: { marginTop: '15px' } },
-                                            e('div', { className: 'info-label', style: { marginBottom: '8px' } }, 'Receipt:'),
-                                            e('div', { 
-                                                onClick: () => setModalImage(order.receiptUrl),
-                                                style: { cursor: 'pointer' }
-                                            },
-                                                e('img', { 
-                                                    src: order.receiptUrl, 
-                                                    className: 'receipt-preview',
-                                                    alt: 'Receipt'
-                                                }),
-                                                e('div', { className: 'receipt-hint' }, '🔍 Click to enlarge')
-                                            )
-                                        ),
-                                        !order.receiptUrl && e('div', { className: 'no-receipt' }, 'No receipt uploaded'),
-                                        order.additionalNotes && e('div', { className: 'notes' }, 
-                                            '💬 ' + order.additionalNotes
+                                            ),
+                                            
+                                            order.receiptUrl && e('div', { style: { marginTop: '15px' } },
+                                                e('div', { className: 'info-label', style: { marginBottom: '8px' } }, 'Receipt:'),
+                                                e('div', { onClick: () => setModalImage(order.receiptUrl), style: { cursor: 'pointer' } },
+                                                    e('img', { src: order.receiptUrl, className: 'receipt-preview', alt: 'Receipt' }),
+                                                    e('div', { className: 'receipt-hint' }, '🔍 Click to enlarge')
+                                                )
+                                            ),
+                                            !order.receiptUrl && e('div', { className: 'no-receipt' }, 'No receipt uploaded'),
+                                            order.additionalNotes && e('div', { className: 'notes' }, '💬 ' + order.additionalNotes)
                                         )
+                                    ),
+                                    
+                                    // Actions — including new Print button
+                                    e('div', { className: 'action-buttons' },
+                                        order.status === 'pending' && e('button', {
+                                            className: 'btn btn-primary',
+                                            onClick: () => updateOrderStatus(orderId, 'processing')
+                                        }, 'Start Processing'),
+                                        order.status === 'processing' && e('button', {
+                                            className: 'btn btn-success',
+                                            onClick: () => updateOrderStatus(orderId, 'completed')
+                                        }, 'Mark Complete'),
+                                        order.status === 'completed' && e('button', {
+                                            className: 'btn btn-secondary',
+                                            onClick: () => updateOrderStatus(orderId, 'pending')
+                                        }, 'Reopen Order'),
+                                        
+                                        // 🖨️ Print button — always visible
+                                        e('button', {
+                                            className: 'btn btn-print',
+                                            onClick: () => printOrder(orderId)
+                                        }, '🖨️ Print Order')
                                     )
-                                ),
-                                
-                                // Actions
-                                e('div', { className: 'action-buttons' },
-                                    order.status === 'pending' && e('button', {
-                                        className: 'btn btn-primary',
-                                        onClick: () => updateOrderStatus(orderId, 'processing')
-                                    }, 'Start Processing'),
-                                    order.status === 'processing' && e('button', {
-                                        className: 'btn btn-success',
-                                        onClick: () => updateOrderStatus(orderId, 'completed')
-                                    }, 'Mark Complete'),
-                                    order.status === 'completed' && e('button', {
-                                        className: 'btn btn-secondary',
-                                        onClick: () => updateOrderStatus(orderId, 'pending')
-                                    }, 'Reopen Order')
                                 )
                             )
                         )
@@ -684,18 +731,15 @@
                 ),
                 
                 // Receipt Modal
-                modalImage && e('div', { 
+                modalImage && e('div', {
                     className: 'receipt-modal active',
                     onClick: () => setModalImage(null)
                 },
-                    e('div', { 
+                    e('div', {
                         className: 'receipt-modal-content',
                         onClick: (ev) => ev.stopPropagation()
                     },
-                        e('button', {
-                            className: 'receipt-modal-close',
-                            onClick: () => setModalImage(null)
-                        }, '✕ Close'),
+                        e('button', { className: 'receipt-modal-close', onClick: () => setModalImage(null) }, '✕ Close'),
                         e('img', { src: modalImage, alt: 'Receipt Full Size' })
                     )
                 )
