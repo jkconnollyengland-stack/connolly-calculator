@@ -140,7 +140,7 @@
         const [adminPwd, setAdminPwd] = useState("");
         const [editingCell, setEditingCell] = useState(null);
         const [handlingFeeOverride, setHandlingFeeOverride] = useState(null);
-        const [postageOverride, setPostageOverride] = useState(null);
+     
 
         const [data, setData] = useState(() => {
             // Try to load from localStorage first
@@ -248,13 +248,13 @@
             const firstRow = data.find(d => d.country === country);
             if (!firstRow) return [];
             
-            // If postage override is set, use it for all boxes
-            if (postageOverride !== null) {
+// If country has a flat shipping rate set, use it for all boxes
+            if (firstRow.shipping != null) {
                 return BOX_LABELS.map((label, i) => ({
                     label,
                     dims: BOX_DIMS[i],
-                    price: postageOverride,
-                    total: grandTotal + postageOverride
+                    price: firstRow.shipping,
+                    total: grandTotal + firstRow.shipping
                 }));
             }
             
@@ -265,7 +265,7 @@
               price,
               total: grandTotal + price
             }));
-        }, [country, grandTotal, data, postageOverride]);
+       }, [country, grandTotal, data]);
         
         
         
@@ -552,7 +552,7 @@
                         }, `✓ Active: All calculations now use £${handlingFeeOverride.toFixed(2)} handling fee`)
                     ),
                     
-                    // Flat Rate Postage Override
+// Per-Country Shipping Rate
                     e('div', {
                         style: {
                             background: 'rgba(201,169,110,0.15)',
@@ -562,31 +562,37 @@
                             marginBottom: '24px'
                         }
                     },
-                        e('h2', { style: { fontSize: '24px', marginBottom: '12px', color: '#c9a96e', fontWeight: 600 } }, '📦 Flat Rate Postage'),
+                        e('h2', { style: { fontSize: '24px', marginBottom: '12px', color: '#c9a96e', fontWeight: 600 } }, '📦 Flat Rate Postage by Country'),
                         e('p', { style: { marginBottom: '20px', color: '#c9a96e', opacity: 0.9, fontSize: '18px' } }, 
-                            'Set one flat postage rate for all box sizes. Leave empty to use individual box prices.'
+                            'Set a flat postage rate for each country. Leave empty to use individual box prices.'
                         ),
-                        e('div', { style: { display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap' } },
-                            e('label', { style: { color: '#c9a96e', fontSize: '20px', fontWeight: 600 } }, 'Postage Rate (£):'),
-                            e('input', {
-                                type: 'number',
-                                step: '0.01',
-                                min: '0',
-                                value: postageOverride === null ? '' : postageOverride,
-                                onChange: (ev) => {
-                                    const val = ev.target.value;
-                                    setPostageOverride(val === '' ? null : parseFloat(val));
-                                },
-                                placeholder: 'e.g., 25.00',
-                                style: {
-                                    padding: '14px 18px',
-                                    fontSize: '20px',
-                                    background: '#fff',
-                                    border: '2px solid #c9a96e',
-                                    borderRadius: '8px',
-                                    color: '#000',
-                                    width: '180px',
-                                    fontWeight: 600
+                        e('div', { style: { display: 'flex', flexDirection: 'column', gap: '12px' } },
+                            countries.map(c => {
+                                const crow = data.find(d => d.country === c);
+                                return e('div', { key: c, style: { display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap' } },
+                                    e('label', { style: { color: '#c9a96e', fontSize: '18px', fontWeight: 600, width: '160px' } }, c + ':'),
+                                    e('input', {
+                                        type: 'number',
+                                        step: '0.01',
+                                        min: '0',
+                                        value: crow && crow.shipping != null ? crow.shipping : '',
+                                        onChange: (ev) => {
+                                            const val = ev.target.value;
+                                            const parsed = val === '' ? null : parseFloat(val);
+                                            setData(prev => prev.map(row =>
+                                                row.country === c ? { ...row, shipping: parsed } : row
+                                            ));
+                                        },
+                                        placeholder: 'e.g., 25.00',
+                                        style: {
+                                            padding: '10px 14px',
+                                            fontSize: '18px',
+                                            background: '#fff',
+                                            border: '2px solid #c9a96e',
+                                            borderRadius: '8px',
+                                            color: '#000',
+                                            width: '160px',
+                                            fontWeight: 600
                                 }
                             }),
                             postageOverride !== null && e('button', {
