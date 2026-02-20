@@ -39,7 +39,7 @@
         .login-btn:hover { background: #d4b87a; }
         .login-error { color: #ff6b6b; font-size: 14px; margin-top: 12px; min-height: 20px; }
 
-        /* CHANGE PASSWORD MODAL */
+        /* MODALS */
         .modal-overlay { position: fixed; top:0;left:0;right:0;bottom:0; background: rgba(0,0,0,0.85); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px; }
         .modal-box { background: #1a2332; border: 2px solid rgba(201,169,110,0.4); border-radius: 16px; padding: 40px; width: 100%; max-width: 400px; }
         .modal-title { color: #c9a96e; font-size: 22px; font-weight: 700; margin-bottom: 24px; }
@@ -52,8 +52,14 @@
         .modal-message { font-size: 14px; margin-top: 12px; min-height: 20px; }
         .modal-message.success { color: #4CAF50; }
         .modal-message.error { color: #ff6b6b; }
+        .archive-modal-box { background: #1a2332; border: 2px solid rgba(201,169,110,0.4); border-radius: 16px; padding: 36px; width: 100%; max-width: 420px; text-align: center; }
+        .archive-modal-title { color: #c9a96e; font-size: 22px; font-weight: 700; margin-bottom: 12px; }
+        .archive-modal-text { color: rgba(201,169,110,0.8); font-size: 16px; margin-bottom: 28px; line-height: 1.5; }
+        .archive-modal-buttons { display: flex; gap: 12px; justify-content: center; }
+        .btn-archive-confirm { padding: 12px 28px; background: rgba(255,152,0,0.3); color: #FF9800; border: 1px solid rgba(255,152,0,0.5); border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; }
+        .btn-archive-confirm:hover { background: rgba(255,152,0,0.45); }
 
-        /* DASHBOARD */
+        /* HEADER */
         .header { max-width: 1400px; margin: 0 auto 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
         h1 { color: #c9a96e; font-size: 42px; margin: 0; font-weight: 600; }
         .header-right { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
@@ -61,18 +67,37 @@
         .stat-box { background: rgba(201,169,110,0.1); border-radius: 12px; padding: 15px 25px; border: 1px solid rgba(201,169,110,0.2); }
         .stat-number { font-size: 32px; font-weight: 700; color: #c9a96e; }
         .stat-label { font-size: 14px; color: rgba(201,169,110,0.7); text-transform: uppercase; letter-spacing: 1px; }
-        .container { max-width: 1400px; margin: 0 auto; }
-        .filters { background: rgba(255,255,255,0.04); border-radius: 12px; border: 1px solid rgba(201,169,110,0.2); padding: 20px; margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap; }
-        .filter-btn { padding: 10px 20px; border: 1px solid rgba(201,169,110,0.3); background: rgba(255,255,255,0.04); color: #c9a96e; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; transition: all 0.2s; }
-        .filter-btn:hover { background: rgba(201,169,110,0.1); }
-        .filter-btn.active { background: #c9a96e; color: #0f1724; border-color: #c9a96e; }
         .btn-lock { padding: 10px 20px; background: rgba(255,255,255,0.06); color: rgba(201,169,110,0.8); border: 1px solid rgba(201,169,110,0.25); border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; white-space: nowrap; font-family: inherit; }
         .btn-lock:hover { background: rgba(255,255,255,0.1); }
         .btn-change-pwd { padding: 10px 20px; background: rgba(201,169,110,0.1); color: #c9a96e; border: 1px solid rgba(201,169,110,0.3); border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; white-space: nowrap; font-family: inherit; }
         .btn-change-pwd:hover { background: rgba(201,169,110,0.2); }
+
+        /* TABS */
+        .container { max-width: 1400px; margin: 0 auto; }
+        .tabs { display: flex; gap: 0; margin-bottom: 20px; border-bottom: 2px solid rgba(201,169,110,0.2); }
+        .tab-btn { padding: 12px 28px; background: none; border: none; border-bottom: 3px solid transparent; margin-bottom: -2px; color: rgba(201,169,110,0.5); font-size: 17px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.2s; }
+        .tab-btn:hover { color: #c9a96e; }
+        .tab-btn.active { color: #c9a96e; border-bottom-color: #c9a96e; }
+        .tab-badge { display: inline-block; background: rgba(201,169,110,0.2); color: #c9a96e; border-radius: 12px; padding: 2px 8px; font-size: 13px; margin-left: 8px; }
+
+        /* CONTROLS (search + filters) */
+        .controls { background: rgba(255,255,255,0.04); border-radius: 12px; border: 1px solid rgba(201,169,110,0.2); padding: 16px 20px; margin-bottom: 20px; display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+        .search-wrap { position: relative; flex: 1; min-width: 220px; }
+        .search-input { width: 100%; padding: 10px 36px 10px 40px; background: rgba(255,255,255,0.06); border: 1px solid rgba(201,169,110,0.3); border-radius: 8px; color: #c9a96e; font-size: 16px; outline: none; font-family: inherit; }
+        .search-input::placeholder { color: rgba(201,169,110,0.4); }
+        .search-input:focus { border-color: #c9a96e; background: rgba(255,255,255,0.08); }
+        .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 16px; pointer-events: none; }
+        .search-clear { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; color: rgba(201,169,110,0.5); cursor: pointer; font-size: 20px; padding: 0; line-height: 1; }
+        .filter-btn { padding: 10px 18px; border: 1px solid rgba(201,169,110,0.3); background: rgba(255,255,255,0.04); color: #c9a96e; border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; transition: all 0.2s; font-family: inherit; white-space: nowrap; }
+        .filter-btn:hover { background: rgba(201,169,110,0.1); }
+        .filter-btn.active { background: #c9a96e; color: #0f1724; border-color: #c9a96e; }
+        .search-info { color: rgba(201,169,110,0.6); font-size: 14px; white-space: nowrap; align-self: center; }
+
+        /* ORDERS */
         .orders-grid { display: grid; gap: 20px; }
         .order-card { background: rgba(255,255,255,0.04); border-radius: 16px; border: 1px solid rgba(201,169,110,0.2); padding: 25px; transition: all 0.2s; }
         .order-card:hover { border-color: rgba(201,169,110,0.5); background: rgba(255,255,255,0.06); }
+        .order-card.archived-card { border-color: rgba(201,169,110,0.1); opacity: 0.8; }
         .order-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
         .order-id { font-size: 14px; color: rgba(201,169,110,0.6); font-family: monospace; }
         .order-timestamp { font-size: 16px; color: #c9a96e; font-weight: 600; }
@@ -80,6 +105,7 @@
         .status-pending { background: rgba(255,193,7,0.2); color: #ffc107; border: 1px solid rgba(255,193,7,0.4); }
         .status-processing { background: rgba(33,150,243,0.2); color: #2196F3; border: 1px solid rgba(33,150,243,0.4); }
         .status-completed { background: rgba(76,175,80,0.2); color: #4CAF50; border: 1px solid rgba(76,175,80,0.4); }
+        .status-archived { background: rgba(158,158,158,0.2); color: #9E9E9E; border: 1px solid rgba(158,158,158,0.3); }
         .order-body { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
         .section { background: rgba(201,169,110,0.05); border-radius: 12px; padding: 20px; }
         .section-title { font-size: 18px; font-weight: 700; color: #c9a96e; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
@@ -99,6 +125,10 @@
         .btn-success { background: rgba(76,175,80,0.3); color: #4CAF50; border: 1px solid rgba(76,175,80,0.4); }
         .btn-print { background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
         .btn-print:hover { background: rgba(255,255,255,0.15); }
+        .btn-archive { background: rgba(255,152,0,0.15); color: #FF9800; border: 1px solid rgba(255,152,0,0.35); }
+        .btn-archive:hover { background: rgba(255,152,0,0.28); }
+        .btn-unarchive { background: rgba(158,158,158,0.15); color: #bbb; border: 1px solid rgba(158,158,158,0.3); }
+        .btn-unarchive:hover { background: rgba(158,158,158,0.25); }
         .btn:hover { transform: translateY(-2px); }
         .duty-badge { display: inline-block; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; margin-top: 8px; }
         .duty-paid { background: rgba(76,175,80,0.2); color: #4CAF50; }
@@ -106,6 +136,7 @@
         .empty-state { text-align: center; padding: 80px 20px; color: rgba(201,169,110,0.5); }
         .empty-icon { font-size: 64px; margin-bottom: 20px; }
         .empty-text { font-size: 24px; font-weight: 600; }
+        .empty-sub { font-size: 16px; margin-top: 10px; opacity: 0.7; }
         .notes { background: rgba(255,255,255,0.02); border-left: 3px solid #c9a96e; padding: 12px; margin-top: 12px; border-radius: 4px; color: rgba(201,169,110,0.9); font-size: 14px; font-style: italic; }
         .receipt-modal { display: none; position: fixed; top:0;left:0;right:0;bottom:0; background: rgba(0,0,0,0.95); z-index: 9999; align-items: center; justify-content: center; padding: 20px; }
         .receipt-modal.active { display: flex; }
@@ -113,13 +144,15 @@
         .receipt-modal img { max-width: 100%; max-height: 90vh; object-fit: contain; border-radius: 8px; }
         .receipt-modal-close { position: absolute; top: -40px; right: 0; background: #c9a96e; color: #0f1724; border: none; border-radius: 8px; padding: 10px 20px; font-size: 18px; font-weight: 600; cursor: pointer; }
         .receipt-hint { font-size: 12px; color: rgba(201,169,110,0.6); margin-top: 6px; font-style: italic; }
+        mark { background: rgba(201,169,110,0.4); color: #fff; border-radius: 3px; padding: 0 2px; }
 
         /* PRINT */
         @media print {
             .order-card-wrapper:not(.printing-this) { display: none !important; }
             .header { display: none !important; }
-            .filters { display: none !important; }
-            .printing-this { margin: 0 !important; border: none !important; border-radius: 0 !important; }
+            .controls { display: none !important; }
+            .tabs { display: none !important; }
+            .printing-this { margin: 0 !important; }
             body { background: white !important; padding: 0 !important; }
             .order-card { background: white !important; border: none !important; }
             .section { background: #f5f5f5 !important; border: 1px solid #ddd !important; }
@@ -135,6 +168,7 @@
             .status-pending { background: #fff8e1 !important; color: #7c5900 !important; border-color: #ccc !important; }
             .status-processing { background: #e3f2fd !important; color: #0d47a1 !important; border-color: #ccc !important; }
             .status-completed { background: #e8f5e9 !important; color: #1b5e20 !important; border-color: #ccc !important; }
+            .status-archived { background: #f5f5f5 !important; color: #555 !important; border-color: #ccc !important; }
             .duty-paid { background: #e8f5e9 !important; color: #1b5e20 !important; }
             .duty-unpaid { background: #fff3e0 !important; color: #7c4200 !important; }
             .action-buttons { display: none !important; }
@@ -162,23 +196,37 @@
         }
 
         function printOrder(orderId) {
-            const allCards = document.querySelectorAll('.order-card-wrapper');
-            allCards.forEach(card => card.classList.remove('printing-this'));
+            document.querySelectorAll('.order-card-wrapper').forEach(c => c.classList.remove('printing-this'));
             const target = document.getElementById('order-' + orderId);
-            if (target) {
-                target.classList.add('printing-this');
-                window.print();
-                setTimeout(() => target.classList.remove('printing-this'), 1000);
-            }
+            if (target) { target.classList.add('printing-this'); window.print(); setTimeout(() => target.classList.remove('printing-this'), 1000); }
         }
 
-        // ── LOGIN SCREEN ──────────────────────────────────────────
+        // Highlight matching text in search results
+        function Highlighted({ text, term }) {
+            if (!term || !text) return e('span', {}, text || '');
+            const str = String(text);
+            const idx = str.toLowerCase().indexOf(term.toLowerCase());
+            if (idx === -1) return e('span', {}, str);
+            return e('span', {}, str.slice(0, idx), e('mark', {}, str.slice(idx, idx + term.length)), str.slice(idx + term.length));
+        }
+
+        function orderMatchesSearch(order, term) {
+            if (!term) return true;
+            const t = term.toLowerCase();
+            const c = order.customer || {};
+            const a = c.address || {};
+            return [c.name, c.email, c.phone, a.line1, a.line2, a.postcode,
+                    order.staffMember, order.trackingNumber,
+                    order.calculation && order.calculation.country]
+                .some(v => v && String(v).toLowerCase().includes(t));
+        }
+
+        // ── LOGIN ─────────────────────────────────────────────────
         function LoginScreen({ onLogin }) {
             const [pwd, setPwd] = useState('');
             const [error, setError] = useState('');
             const [shake, setShake] = useState(false);
             const inputRef = useRef(null);
-
             useEffect(() => { if (inputRef.current) inputRef.current.focus(); }, []);
 
             const attempt = () => {
@@ -187,8 +235,7 @@
                     onLogin();
                 } else {
                     setError('Incorrect password. Please try again.');
-                    setShake(true);
-                    setPwd('');
+                    setShake(true); setPwd('');
                     setTimeout(() => setShake(false), 400);
                 }
             };
@@ -198,34 +245,26 @@
                     e('div', { className: 'login-logo' }, '🔒'),
                     e('div', { className: 'login-title' }, 'Warehouse Orders'),
                     e('div', { className: 'login-subtitle' }, 'Connolly — Authorised Access Only'),
-                    e('input', {
-                        ref: inputRef,
-                        type: 'password',
-                        className: 'login-input' + (shake ? ' error' : ''),
-                        placeholder: 'Enter password',
-                        value: pwd,
-                        onChange: ev => { setPwd(ev.target.value); setError(''); },
-                        onKeyDown: ev => { if (ev.key === 'Enter') attempt(); }
-                    }),
+                    e('input', { ref: inputRef, type: 'password', className: 'login-input' + (shake ? ' error' : ''), placeholder: 'Enter password', value: pwd, onChange: ev => { setPwd(ev.target.value); setError(''); }, onKeyDown: ev => { if (ev.key === 'Enter') attempt(); } }),
                     e('button', { className: 'login-btn', onClick: attempt }, 'Sign In'),
                     e('div', { className: 'login-error' }, error)
                 )
             );
         }
 
-        // ── CHANGE PASSWORD MODAL ─────────────────────────────────
+        // ── CHANGE PASSWORD ───────────────────────────────────────
         function ChangePasswordModal({ onClose }) {
             const [current, setCurrent] = useState('');
             const [newPwd, setNewPwd] = useState('');
             const [confirm, setConfirm] = useState('');
-            const [message, setMessage] = useState({ text: '', type: '' });
+            const [msg, setMsg] = useState({ text: '', type: '' });
 
             const save = () => {
-                if (current !== getStoredPassword()) { setMessage({ text: 'Current password is incorrect.', type: 'error' }); return; }
-                if (newPwd.length < 6) { setMessage({ text: 'New password must be at least 6 characters.', type: 'error' }); return; }
-                if (newPwd !== confirm) { setMessage({ text: 'New passwords do not match.', type: 'error' }); return; }
+                if (current !== getStoredPassword()) { setMsg({ text: 'Current password is incorrect.', type: 'error' }); return; }
+                if (newPwd.length < 6) { setMsg({ text: 'New password must be at least 6 characters.', type: 'error' }); return; }
+                if (newPwd !== confirm) { setMsg({ text: 'New passwords do not match.', type: 'error' }); return; }
                 localStorage.setItem(STORAGE_KEY, newPwd);
-                setMessage({ text: '✓ Password changed successfully!', type: 'success' });
+                setMsg({ text: '✓ Password changed successfully!', type: 'success' });
                 setTimeout(onClose, 1500);
             };
 
@@ -237,16 +276,145 @@
                     e('label', { className: 'modal-label' }, 'New password'),
                     e('input', { type: 'password', className: 'modal-input', value: newPwd, onChange: ev => setNewPwd(ev.target.value) }),
                     e('label', { className: 'modal-label' }, 'Confirm new password'),
-                    e('input', {
-                        type: 'password', className: 'modal-input', value: confirm,
-                        onChange: ev => setConfirm(ev.target.value),
-                        onKeyDown: ev => { if (ev.key === 'Enter') save(); }
-                    }),
+                    e('input', { type: 'password', className: 'modal-input', value: confirm, onChange: ev => setConfirm(ev.target.value), onKeyDown: ev => { if (ev.key === 'Enter') save(); } }),
                     e('div', { className: 'modal-buttons' },
                         e('button', { className: 'modal-btn-confirm', onClick: save }, 'Save Password'),
                         e('button', { className: 'modal-btn-cancel', onClick: onClose }, 'Cancel')
                     ),
-                    message.text && e('div', { className: 'modal-message ' + message.type }, message.text)
+                    msg.text && e('div', { className: 'modal-message ' + msg.type }, msg.text)
+                )
+            );
+        }
+
+        // ── ARCHIVE CONFIRM ───────────────────────────────────────
+        function ArchiveModal({ order, onConfirm, onCancel }) {
+            const name = (order.customer && order.customer.name) || 'this order';
+            return e('div', { className: 'modal-overlay', onClick: onCancel },
+                e('div', { className: 'archive-modal-box', onClick: ev => ev.stopPropagation() },
+                    e('div', { className: 'archive-modal-title' }, '📦 Archive Order?'),
+                    e('div', { className: 'archive-modal-text' }, `Archive the order for ${name}? It will move to the Archive tab and can be restored at any time.`),
+                    e('div', { className: 'archive-modal-buttons' },
+                        e('button', { className: 'btn-archive-confirm', onClick: onConfirm }, 'Yes, Archive'),
+                        e('button', { className: 'modal-btn-cancel', style: { flex: 'none', padding: '12px 28px' }, onClick: onCancel }, 'Cancel')
+                    )
+                )
+            );
+        }
+
+        // ── SINGLE ORDER CARD ─────────────────────────────────────
+        function OrderCard({ orderId, order, onArchive, onUnarchive, onUpdateStatus, onImageClick, searchTerm, isArchived }) {
+            const formatDate = iso => new Date(iso).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const fmt = n => '£' + n.toFixed(2);
+            const hl = text => e(Highlighted, { text: String(text || ''), term: searchTerm });
+
+            return e('div', { id: 'order-' + orderId, className: 'order-card-wrapper' },
+                e('div', { className: 'print-header' },
+                    e('h2', {}, 'Connolly — Order Sheet'),
+                    e('p', {}, 'Printed: ' + new Date().toLocaleString('en-GB'))
+                ),
+                e('div', { className: 'order-card' + (isArchived ? ' archived-card' : '') },
+                    // Header row
+                    e('div', { className: 'order-header' },
+                        e('div', {},
+                            e('div', { className: 'order-timestamp' }, formatDate(order.timestamp)),
+                            e('div', { className: 'order-id' }, 'Order ID: ' + orderId.slice(0, 8))
+                        ),
+                        e('span', { className: 'status-badge status-' + (isArchived ? 'archived' : order.status) }, isArchived ? 'Archived' : order.status)
+                    ),
+
+                    e('div', { className: 'order-body' },
+                        // Customer
+                        e('div', { className: 'section' },
+                            e('div', { className: 'section-title' }, 'Customer'),
+                            e('div', { className: 'customer-name' }, hl(order.customer.name)),
+                            e('div', { className: 'address-line' }, hl(order.customer.address.line1)),
+                            order.customer.address.line2 && e('div', { className: 'address-line' }, hl(order.customer.address.line2)),
+                            e('div', { className: 'address-line' }, hl(order.customer.address.line3)),
+                            order.customer.address.line4 && e('div', { className: 'address-line' }, hl(order.customer.address.line4)),
+                            e('div', { className: 'address-line' }, hl(order.customer.address.postcode)),
+                            e('div', { className: 'info-row', style: { marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(201,169,110,0.2)' } },
+                                e('span', { className: 'info-label' }, 'Phone:'), e('span', { className: 'info-value' }, hl(order.customer.phone))
+                            ),
+                            e('div', { className: 'info-row' },
+                                e('span', { className: 'info-label' }, 'Email:'), e('span', { className: 'info-value', style: { fontSize: '13px' } }, hl(order.customer.email))
+                            ),
+                            order.customer.vatEori && e('div', { className: 'info-row' },
+                                e('span', { className: 'info-label' }, 'VAT/EORI:'), e('span', { className: 'info-value' }, hl(order.customer.vatEori))
+                            )
+                        ),
+
+                        // Calculation
+                        e('div', { className: 'section' },
+                            e('div', { className: 'section-title' }, 'Calculation'),
+                            e('div', { className: 'info-row' }, e('span', { className: 'info-label' }, 'Destination:'), e('strong', { className: 'info-value' }, hl(order.calculation.country))),
+                            e('div', { className: 'info-row' }, e('span', { className: 'info-label' }, 'Total Goods:'), e('span', { className: 'info-value' }, fmt(order.calculation.totalGoods))),
+                            e('div', { className: 'info-row' }, e('span', { className: 'info-label' }, 'Duty:'), e('span', { className: 'info-value' }, fmt(order.calculation.totalDuty))),
+                            e('div', { className: 'info-row' }, e('span', { className: 'info-label' }, 'Tax:'), e('span', { className: 'info-value' }, fmt(order.calculation.totalTax))),
+                            e('div', { className: 'info-row' }, e('span', { className: 'info-label' }, 'Handling:'), e('span', { className: 'info-value' }, fmt(order.calculation.handlingFee))),
+                            e('div', { className: 'info-row', style: { borderTop: '2px solid rgba(201,169,110,0.3)', marginTop: '8px', paddingTop: '8px' } },
+                                e('strong', { className: 'info-label' }, 'Before Shipping:'), e('strong', { className: 'info-value', style: { fontSize: '18px' } }, fmt(order.calculation.grandTotal))
+                            ),
+                            e('div', { className: 'info-row' }, e('span', { className: 'info-label' }, 'Shipping (' + order.calculation.boxSize + '):'), e('span', { className: 'info-value' }, fmt(order.calculation.shippingCost))),
+                            e('div', { className: 'info-row', style: { borderTop: '2px solid rgba(201,169,110,0.3)', marginTop: '8px', paddingTop: '8px' } },
+                                e('strong', { className: 'info-label' }, 'TOTAL:'), e('strong', { className: 'info-value', style: { fontSize: '20px', color: '#c9a96e' } }, fmt(order.calculation.grandTotal + order.calculation.shippingCost))
+                            )
+                        ),
+
+                        // Shipping details
+                        e('div', { className: 'section' },
+                            e('div', { className: 'section-title' }, 'Shipping Details'),
+                            e('div', { className: 'info-row' }, e('span', { className: 'info-label' }, 'Staff Member:'), e('span', { className: 'info-value' }, hl(order.staffMember))),
+                            e('div', { className: 'info-row' },
+                                e('span', { className: 'info-label' }, 'Duty Payment:'),
+                                e('span', { className: 'duty-badge ' + (order.dutyPaid ? 'duty-paid' : 'duty-unpaid') }, order.dutyPaid ? 'PAID' : 'UNPAID')
+                            ),
+                            e('div', { style: { marginTop: '15px', padding: '12px', background: 'rgba(33,150,243,0.1)', borderRadius: '8px', border: '1px solid rgba(33,150,243,0.3)' } },
+                                e('div', { className: 'info-label', style: { marginBottom: '8px' } }, '📦 Tracking Number:'),
+                                order.trackingNumber ?
+                                    e('div', {},
+                                        e('a', { href: order.trackingNumber, target: '_blank', style: { color: '#2196F3', fontSize: '14px', wordBreak: 'break-all' } }, hl(order.trackingNumber)),
+                                        !isArchived && e('button', {
+                                            onClick: () => { const t = prompt('Update tracking number:', order.trackingNumber); if (t !== null) db.ref(`shipping-orders/${orderId}`).update({ trackingNumber: t }); },
+                                            style: { display: 'block', marginTop: '8px', padding: '6px 12px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(201,169,110,0.3)', borderRadius: '6px', color: '#c9a96e', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit' }
+                                        }, 'Update')
+                                    )
+                                :
+                                    !isArchived && e('button', {
+                                        onClick: () => { const t = prompt('Enter tracking URL:'); if (t) db.ref(`shipping-orders/${orderId}`).update({ trackingNumber: t }); },
+                                        style: { padding: '10px 16px', background: '#2196F3', border: 'none', borderRadius: '6px', color: 'white', cursor: 'pointer', fontSize: '14px', fontWeight: 600, fontFamily: 'inherit' }
+                                    }, '+ Add Tracking Number')
+                            ),
+                            order.itemDetails && order.itemDetails.length > 0 && e('div', { style: { marginTop: '15px' } },
+                                e('div', { className: 'info-label', style: { marginBottom: '10px', fontSize: '16px', fontWeight: 600 } }, 'Items for Customs:'),
+                                order.itemDetails.map((item, idx) =>
+                                    e('div', { key: idx, style: { background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '6px', marginBottom: '8px', border: '1px solid rgba(201,169,110,0.15)' } },
+                                        item.description && e('div', { style: { marginBottom: '4px' } }, e('strong', { style: { color: 'rgba(201,169,110,0.9)', fontSize: '13px' } }, 'Description: '), e('span', { style: { color: 'rgba(201,169,110,0.7)', fontSize: '13px' } }, item.description)),
+                                        item.composition && e('div', { style: { marginBottom: '4px' } }, e('strong', { style: { color: 'rgba(201,169,110,0.9)', fontSize: '13px' } }, 'Composition: '), e('span', { style: { color: 'rgba(201,169,110,0.7)', fontSize: '13px' } }, item.composition)),
+                                        item.origin && e('div', {}, e('strong', { style: { color: 'rgba(201,169,110,0.9)', fontSize: '13px' } }, 'Origin: '), e('span', { style: { color: 'rgba(201,169,110,0.7)', fontSize: '13px' } }, item.origin))
+                                    )
+                                )
+                            ),
+                            order.receiptUrl && e('div', { style: { marginTop: '15px' } },
+                                e('div', { className: 'info-label', style: { marginBottom: '8px' } }, 'Receipt:'),
+                                e('div', { onClick: () => onImageClick(order.receiptUrl), style: { cursor: 'pointer' } },
+                                    e('img', { src: order.receiptUrl, className: 'receipt-preview', alt: 'Receipt' }),
+                                    e('div', { className: 'receipt-hint' }, '🔍 Click to enlarge')
+                                )
+                            ),
+                            !order.receiptUrl && e('div', { className: 'no-receipt' }, 'No receipt uploaded'),
+                            order.additionalNotes && e('div', { className: 'notes' }, '💬 ' + order.additionalNotes)
+                        )
+                    ),
+
+                    // Actions
+                    e('div', { className: 'action-buttons' },
+                        !isArchived && order.status === 'pending' && e('button', { className: 'btn btn-primary', onClick: () => onUpdateStatus(orderId, 'processing') }, 'Start Processing'),
+                        !isArchived && order.status === 'processing' && e('button', { className: 'btn btn-success', onClick: () => onUpdateStatus(orderId, 'completed') }, 'Mark Complete'),
+                        !isArchived && order.status === 'completed' && e('button', { className: 'btn btn-secondary', onClick: () => onUpdateStatus(orderId, 'pending') }, 'Reopen Order'),
+                        !isArchived && e('button', { className: 'btn btn-archive', onClick: () => onArchive(orderId, order) }, '📦 Archive'),
+                        isArchived && e('button', { className: 'btn btn-unarchive', onClick: () => onUnarchive(orderId) }, '↩ Restore'),
+                        e('button', { className: 'btn btn-print', onClick: () => printOrder(orderId) }, '🖨️ Print Order')
+                    )
                 )
             );
         }
@@ -254,26 +422,41 @@
         // ── MAIN DASHBOARD ────────────────────────────────────────
         function Dashboard({ onLock }) {
             const [orders, setOrders] = useState({});
+            const [archived, setArchived] = useState({});
+            const [tab, setTab] = useState('active');
             const [filter, setFilter] = useState('all');
+            const [searchTerm, setSearchTerm] = useState('');
             const [modalImage, setModalImage] = useState(null);
             const [showChangePwd, setShowChangePwd] = useState(false);
+            const [archiveTarget, setArchiveTarget] = useState(null);
 
             useEffect(() => {
-                const ordersRef = db.ref('shipping-orders');
-                ordersRef.on('value', snapshot => setOrders(snapshot.val() || {}));
-                return () => ordersRef.off();
+                const activeRef = db.ref('shipping-orders');
+                activeRef.on('value', snap => setOrders(snap.val() || {}));
+                const archiveRef = db.ref('shipping-orders-archive');
+                archiveRef.on('value', snap => setArchived(snap.val() || {}));
+                return () => { activeRef.off(); archiveRef.off(); };
             }, []);
 
             const updateOrderStatus = async (orderId, newStatus) => {
                 await db.ref(`shipping-orders/${orderId}`).update({ status: newStatus });
             };
 
-            const formatDate = iso => new Date(iso).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
-            const fmt = amount => '£' + amount.toFixed(2);
+            const doArchive = async () => {
+                if (!archiveTarget) return;
+                const { orderId, order } = archiveTarget;
+                await db.ref(`shipping-orders-archive/${orderId}`).set({ ...order, archivedAt: new Date().toISOString() });
+                await db.ref(`shipping-orders/${orderId}`).remove();
+                setArchiveTarget(null);
+            };
 
-            const filteredOrders = Object.entries(orders)
-                .filter(([, o]) => filter === 'all' || o.status === filter)
-                .sort((a, b) => new Date(b[1].timestamp) - new Date(a[1].timestamp));
+            const doUnarchive = async (orderId) => {
+                const order = archived[orderId];
+                if (!order) return;
+                const { archivedAt, ...rest } = order;
+                await db.ref(`shipping-orders/${orderId}`).set(rest);
+                await db.ref(`shipping-orders-archive/${orderId}`).remove();
+            };
 
             const stats = {
                 total: Object.keys(orders).length,
@@ -282,14 +465,23 @@
                 completed: Object.values(orders).filter(o => o.status === 'completed').length
             };
 
+            const source = tab === 'active' ? orders : archived;
+
+            const displayed = Object.entries(source)
+                .filter(([, o]) => tab === 'archive' || filter === 'all' || o.status === filter)
+                .filter(([, o]) => orderMatchesSearch(o, searchTerm))
+                .sort((a, b) => new Date(b[1].timestamp) - new Date(a[1].timestamp));
+
             return e('div', {},
                 showChangePwd && e(ChangePasswordModal, { onClose: () => setShowChangePwd(false) }),
+                archiveTarget && e(ArchiveModal, { order: archiveTarget.order, onConfirm: doArchive, onCancel: () => setArchiveTarget(null) }),
 
+                // Header
                 e('div', { className: 'header' },
                     e('h1', {}, '📦 Warehouse Orders'),
                     e('div', { className: 'header-right' },
                         e('div', { className: 'stats' },
-                            e('div', { className: 'stat-box' }, e('div', { className: 'stat-number' }, stats.total), e('div', { className: 'stat-label' }, 'Total')),
+                            e('div', { className: 'stat-box' }, e('div', { className: 'stat-number' }, stats.total), e('div', { className: 'stat-label' }, 'Active')),
                             e('div', { className: 'stat-box' }, e('div', { className: 'stat-number' }, stats.pending), e('div', { className: 'stat-label' }, 'Pending')),
                             e('div', { className: 'stat-box' }, e('div', { className: 'stat-number' }, stats.processing), e('div', { className: 'stat-label' }, 'Processing')),
                             e('div', { className: 'stat-box' }, e('div', { className: 'stat-number' }, stats.completed), e('div', { className: 'stat-label' }, 'Completed'))
@@ -300,132 +492,61 @@
                 ),
 
                 e('div', { className: 'container' },
-                    e('div', { className: 'filters' },
-                        ['all','pending','processing','completed'].map(f =>
-                            e('button', { key: f, className: 'filter-btn' + (filter === f ? ' active' : ''), onClick: () => setFilter(f) },
-                                f === 'all' ? 'All Orders' : f.charAt(0).toUpperCase() + f.slice(1))
+                    // Tabs
+                    e('div', { className: 'tabs' },
+                        e('button', { className: 'tab-btn' + (tab === 'active' ? ' active' : ''), onClick: () => { setTab('active'); setSearchTerm(''); setFilter('all'); } },
+                            'Active Orders ', e('span', { className: 'tab-badge' }, stats.total)
+                        ),
+                        e('button', { className: 'tab-btn' + (tab === 'archive' ? ' active' : ''), onClick: () => { setTab('archive'); setSearchTerm(''); } },
+                            'Archive ', e('span', { className: 'tab-badge' }, Object.keys(archived).length)
                         )
                     ),
 
-                    filteredOrders.length === 0 ?
+                    // Search + filters
+                    e('div', { className: 'controls' },
+                        e('div', { className: 'search-wrap' },
+                            e('span', { className: 'search-icon' }, '🔍'),
+                            e('input', {
+                                type: 'text',
+                                className: 'search-input',
+                                placeholder: 'Search by name, email, country, staff member...',
+                                value: searchTerm,
+                                onChange: ev => setSearchTerm(ev.target.value)
+                            }),
+                            searchTerm && e('button', { className: 'search-clear', onClick: () => setSearchTerm('') }, '×')
+                        ),
+                        tab === 'active' && ['all','pending','processing','completed'].map(f =>
+                            e('button', { key: f, className: 'filter-btn' + (filter === f ? ' active' : ''), onClick: () => setFilter(f) },
+                                f === 'all' ? 'All' : f.charAt(0).toUpperCase() + f.slice(1))
+                        ),
+                        searchTerm && e('span', { className: 'search-info' },
+                            displayed.length === 0 ? 'No results' : `${displayed.length} result${displayed.length !== 1 ? 's' : ''}`)
+                    ),
+
+                    // Orders list
+                    displayed.length === 0 ?
                         e('div', { className: 'empty-state' },
-                            e('div', { className: 'empty-icon' }, '📭'),
-                            e('div', { className: 'empty-text' }, filter === 'all' ? 'No orders yet' : `No ${filter} orders`)
+                            e('div', { className: 'empty-icon' }, searchTerm ? '🔍' : tab === 'archive' ? '🗄️' : '📭'),
+                            e('div', { className: 'empty-text' }, searchTerm ? 'No orders match your search' : tab === 'archive' ? 'No archived orders' : 'No orders yet'),
+                            searchTerm && e('div', { className: 'empty-sub' }, 'Try searching for something else')
                         )
                     :
                     e('div', { className: 'orders-grid' },
-                        filteredOrders.map(([orderId, order]) =>
-                            e('div', { key: orderId, id: 'order-' + orderId, className: 'order-card-wrapper' },
-                                e('div', { className: 'print-header' },
-                                    e('h2', {}, 'Connolly — Order Sheet'),
-                                    e('p', {}, 'Printed: ' + new Date().toLocaleString('en-GB'))
-                                ),
-                                e('div', { className: 'order-card' },
-                                    e('div', { className: 'order-header' },
-                                        e('div', {},
-                                            e('div', { className: 'order-timestamp' }, formatDate(order.timestamp)),
-                                            e('div', { className: 'order-id' }, 'Order ID: ' + orderId.slice(0, 8))
-                                        ),
-                                        e('span', { className: 'status-badge status-' + order.status }, order.status)
-                                    ),
-                                    e('div', { className: 'order-body' },
-                                        // Customer
-                                        e('div', { className: 'section' },
-                                            e('div', { className: 'section-title' }, 'Customer'),
-                                            e('div', { className: 'customer-name' }, order.customer.name),
-                                            e('div', { className: 'address-line' }, order.customer.address.line1),
-                                            order.customer.address.line2 && e('div', { className: 'address-line' }, order.customer.address.line2),
-                                            e('div', { className: 'address-line' }, order.customer.address.line3),
-                                            order.customer.address.line4 && e('div', { className: 'address-line' }, order.customer.address.line4),
-                                            e('div', { className: 'address-line' }, order.customer.address.postcode),
-                                            e('div', { className: 'info-row', style: { marginTop: '12px', paddingTop: '12px', borderTop: '1px solid rgba(201,169,110,0.2)' } },
-                                                e('span', { className: 'info-label' }, 'Phone:'),
-                                                e('span', { className: 'info-value' }, order.customer.phone)
-                                            ),
-                                            e('div', { className: 'info-row' },
-                                                e('span', { className: 'info-label' }, 'Email:'),
-                                                e('span', { className: 'info-value', style: { fontSize: '13px' } }, order.customer.email)
-                                            ),
-                                            order.customer.vatEori && e('div', { className: 'info-row' },
-                                                e('span', { className: 'info-label' }, 'VAT/EORI:'),
-                                                e('span', { className: 'info-value' }, order.customer.vatEori)
-                                            )
-                                        ),
-                                        // Calculation
-                                        e('div', { className: 'section' },
-                                            e('div', { className: 'section-title' }, 'Calculation'),
-                                            e('div', { className: 'info-row' }, e('span', { className: 'info-label' }, 'Destination:'), e('strong', { className: 'info-value' }, order.calculation.country)),
-                                            e('div', { className: 'info-row' }, e('span', { className: 'info-label' }, 'Total Goods:'), e('span', { className: 'info-value' }, fmt(order.calculation.totalGoods))),
-                                            e('div', { className: 'info-row' }, e('span', { className: 'info-label' }, 'Duty:'), e('span', { className: 'info-value' }, fmt(order.calculation.totalDuty))),
-                                            e('div', { className: 'info-row' }, e('span', { className: 'info-label' }, 'Tax:'), e('span', { className: 'info-value' }, fmt(order.calculation.totalTax))),
-                                            e('div', { className: 'info-row' }, e('span', { className: 'info-label' }, 'Handling:'), e('span', { className: 'info-value' }, fmt(order.calculation.handlingFee))),
-                                            e('div', { className: 'info-row', style: { borderTop: '2px solid rgba(201,169,110,0.3)', marginTop: '8px', paddingTop: '8px' } },
-                                                e('strong', { className: 'info-label' }, 'Before Shipping:'),
-                                                e('strong', { className: 'info-value', style: { fontSize: '18px' } }, fmt(order.calculation.grandTotal))
-                                            ),
-                                            e('div', { className: 'info-row' }, e('span', { className: 'info-label' }, 'Shipping (' + order.calculation.boxSize + '):'), e('span', { className: 'info-value' }, fmt(order.calculation.shippingCost))),
-                                            e('div', { className: 'info-row', style: { borderTop: '2px solid rgba(201,169,110,0.3)', marginTop: '8px', paddingTop: '8px' } },
-                                                e('strong', { className: 'info-label' }, 'TOTAL:'),
-                                                e('strong', { className: 'info-value', style: { fontSize: '20px', color: '#c9a96e' } }, fmt(order.calculation.grandTotal + order.calculation.shippingCost))
-                                            )
-                                        ),
-                                        // Shipping Details
-                                        e('div', { className: 'section' },
-                                            e('div', { className: 'section-title' }, 'Shipping Details'),
-                                            e('div', { className: 'info-row' }, e('span', { className: 'info-label' }, 'Staff Member:'), e('span', { className: 'info-value' }, order.staffMember)),
-                                            e('div', { className: 'info-row' },
-                                                e('span', { className: 'info-label' }, 'Duty Payment:'),
-                                                e('span', { className: 'duty-badge ' + (order.dutyPaid ? 'duty-paid' : 'duty-unpaid') }, order.dutyPaid ? 'PAID' : 'UNPAID')
-                                            ),
-                                            e('div', { style: { marginTop: '15px', padding: '12px', background: 'rgba(33,150,243,0.1)', borderRadius: '8px', border: '1px solid rgba(33,150,243,0.3)' } },
-                                                e('div', { className: 'info-label', style: { marginBottom: '8px' } }, '📦 Tracking Number:'),
-                                                order.trackingNumber ?
-                                                    e('div', {},
-                                                        e('a', { href: order.trackingNumber, target: '_blank', style: { color: '#2196F3', fontSize: '14px', wordBreak: 'break-all' } }, order.trackingNumber),
-                                                        e('button', {
-                                                            onClick: () => { const t = prompt('Update tracking number:', order.trackingNumber); if (t !== null) db.ref(`shipping-orders/${orderId}`).update({ trackingNumber: t }); },
-                                                            style: { marginTop: '8px', padding: '6px 12px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(201,169,110,0.3)', borderRadius: '6px', color: '#c9a96e', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit' }
-                                                        }, 'Update')
-                                                    )
-                                                :
-                                                    e('button', {
-                                                        onClick: () => { const t = prompt('Enter tracking URL:'); if (t) db.ref(`shipping-orders/${orderId}`).update({ trackingNumber: t }); },
-                                                        style: { padding: '10px 16px', background: '#2196F3', border: 'none', borderRadius: '6px', color: 'white', cursor: 'pointer', fontSize: '14px', fontWeight: 600, fontFamily: 'inherit' }
-                                                    }, '+ Add Tracking Number')
-                                            ),
-                                            order.itemDetails && order.itemDetails.length > 0 && e('div', { style: { marginTop: '15px' } },
-                                                e('div', { className: 'info-label', style: { marginBottom: '10px', fontSize: '16px', fontWeight: 600 } }, 'Items for Customs:'),
-                                                order.itemDetails.map((item, idx) =>
-                                                    e('div', { key: idx, style: { background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '6px', marginBottom: '8px', border: '1px solid rgba(201,169,110,0.15)' } },
-                                                        item.description && e('div', { style: { marginBottom: '4px' } }, e('strong', { style: { color: 'rgba(201,169,110,0.9)', fontSize: '13px' } }, 'Description: '), e('span', { style: { color: 'rgba(201,169,110,0.7)', fontSize: '13px' } }, item.description)),
-                                                        item.composition && e('div', { style: { marginBottom: '4px' } }, e('strong', { style: { color: 'rgba(201,169,110,0.9)', fontSize: '13px' } }, 'Composition: '), e('span', { style: { color: 'rgba(201,169,110,0.7)', fontSize: '13px' } }, item.composition)),
-                                                        item.origin && e('div', {}, e('strong', { style: { color: 'rgba(201,169,110,0.9)', fontSize: '13px' } }, 'Origin: '), e('span', { style: { color: 'rgba(201,169,110,0.7)', fontSize: '13px' } }, item.origin))
-                                                    )
-                                                )
-                                            ),
-                                            order.receiptUrl && e('div', { style: { marginTop: '15px' } },
-                                                e('div', { className: 'info-label', style: { marginBottom: '8px' } }, 'Receipt:'),
-                                                e('div', { onClick: () => setModalImage(order.receiptUrl), style: { cursor: 'pointer' } },
-                                                    e('img', { src: order.receiptUrl, className: 'receipt-preview', alt: 'Receipt' }),
-                                                    e('div', { className: 'receipt-hint' }, '🔍 Click to enlarge')
-                                                )
-                                            ),
-                                            !order.receiptUrl && e('div', { className: 'no-receipt' }, 'No receipt uploaded'),
-                                            order.additionalNotes && e('div', { className: 'notes' }, '💬 ' + order.additionalNotes)
-                                        )
-                                    ),
-                                    e('div', { className: 'action-buttons' },
-                                        order.status === 'pending' && e('button', { className: 'btn btn-primary', onClick: () => updateOrderStatus(orderId, 'processing') }, 'Start Processing'),
-                                        order.status === 'processing' && e('button', { className: 'btn btn-success', onClick: () => updateOrderStatus(orderId, 'completed') }, 'Mark Complete'),
-                                        order.status === 'completed' && e('button', { className: 'btn btn-secondary', onClick: () => updateOrderStatus(orderId, 'pending') }, 'Reopen Order'),
-                                        e('button', { className: 'btn btn-print', onClick: () => printOrder(orderId) }, '🖨️ Print Order')
-                                    )
-                                )
-                            )
+                        displayed.map(([orderId, order]) =>
+                            e(OrderCard, {
+                                key: orderId, orderId, order,
+                                onArchive: (id, o) => setArchiveTarget({ orderId: id, order: o }),
+                                onUnarchive: doUnarchive,
+                                onUpdateStatus: updateOrderStatus,
+                                onImageClick: setModalImage,
+                                searchTerm,
+                                isArchived: tab === 'archive'
+                            })
                         )
                     )
                 ),
 
+                // Receipt modal
                 modalImage && e('div', { className: 'receipt-modal active', onClick: () => setModalImage(null) },
                     e('div', { className: 'receipt-modal-content', onClick: ev => ev.stopPropagation() },
                         e('button', { className: 'receipt-modal-close', onClick: () => setModalImage(null) }, '✕ Close'),
@@ -435,7 +556,7 @@
             );
         }
 
-        // ── ROOT APP ──────────────────────────────────────────────
+        // ── ROOT ──────────────────────────────────────────────────
         function App() {
             const [authed, setAuthed] = useState(() => sessionStorage.getItem(SESSION_KEY) === '1');
             const handleLock = () => { sessionStorage.removeItem(SESSION_KEY); setAuthed(false); };
