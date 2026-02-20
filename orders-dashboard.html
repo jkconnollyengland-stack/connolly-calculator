@@ -6,13 +6,9 @@
     <title>Warehouse Orders Dashboard - Connolly</title>
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    
-    <!-- Firebase v9 - compat version -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    
     <script>
-        // Initialize Firebase
         const firebaseConfig = {
             apiKey: "AIzaSyDbd3uX-VfqtLm7v_jkzGzvFD5GFCf8eSw",
             authDomain: "swis-9b0ce.firebaseapp.com",
@@ -22,517 +18,295 @@
             messagingSenderId: "25689930290",
             appId: "1:25689930290:web:a5370855e0dd7104071a2b"
         };
-        
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
     </script>
-    
     <style>
         * { box-sizing: border-box; }
-        body {
-            margin: 0;
-            padding: 20px;
-            font-family: 'Gill Sans', 'Gill Sans MT', Calibri, sans-serif;
-            background: linear-gradient(135deg, #0f1724 0%, #1a2332 50%, #162030 100%);
-            min-height: 100vh;
-        }
-        .header {
-            max-width: 1400px;
-            margin: 0 auto 30px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 20px;
-        }
-        h1 {
-            color: #c9a96e;
-            font-size: 42px;
-            margin: 0;
-            font-weight: 600;
-        }
-        .stats {
-            display: flex;
-            gap: 20px;
-            flex-wrap: wrap;
-        }
-        .stat-box {
-            background: rgba(201,169,110,0.1);
-            border-radius: 12px;
-            padding: 15px 25px;
-            border: 1px solid rgba(201,169,110,0.2);
-        }
-        .stat-number {
-            font-size: 32px;
-            font-weight: 700;
-            color: #c9a96e;
-        }
-        .stat-label {
-            font-size: 14px;
-            color: rgba(201,169,110,0.7);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-        .filters {
-            background: rgba(255,255,255,0.04);
-            border-radius: 12px;
-            border: 1px solid rgba(201,169,110,0.2);
-            padding: 20px;
-            margin-bottom: 20px;
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        .filter-btn {
-            padding: 10px 20px;
-            border: 1px solid rgba(201,169,110,0.3);
-            background: rgba(255,255,255,0.04);
-            color: #c9a96e;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 16px;
-            font-weight: 600;
-            transition: all 0.2s;
-        }
-        .filter-btn:hover {
-            background: rgba(201,169,110,0.1);
-        }
-        .filter-btn.active {
-            background: #c9a96e;
-            color: #0f1724;
-            border-color: #c9a96e;
-        }
-        .orders-grid {
-            display: grid;
-            gap: 20px;
-        }
-        .order-card {
-            background: rgba(255,255,255,0.04);
-            border-radius: 16px;
-            border: 1px solid rgba(201,169,110,0.2);
-            padding: 25px;
-            transition: all 0.2s;
-        }
-        .order-card:hover {
-            border-color: rgba(201,169,110,0.5);
-            background: rgba(255,255,255,0.06);
-        }
-        .order-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
-        .order-id {
-            font-size: 14px;
-            color: rgba(201,169,110,0.6);
-            font-family: monospace;
-        }
-        .order-timestamp {
-            font-size: 16px;
-            color: #c9a96e;
-            font-weight: 600;
-        }
-        .status-badge {
-            padding: 6px 16px;
-            border-radius: 20px;
-            font-size: 14px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .status-pending {
-            background: rgba(255, 193, 7, 0.2);
-            color: #ffc107;
-            border: 1px solid rgba(255, 193, 7, 0.4);
-        }
-        .status-processing {
-            background: rgba(33, 150, 243, 0.2);
-            color: #2196F3;
-            border: 1px solid rgba(33, 150, 243, 0.4);
-        }
-        .status-completed {
-            background: rgba(76, 175, 80, 0.2);
-            color: #4CAF50;
-            border: 1px solid rgba(76, 175, 80, 0.4);
-        }
-        .order-body {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 25px;
-        }
-        .section {
-            background: rgba(201,169,110,0.05);
-            border-radius: 12px;
-            padding: 20px;
-        }
-        .section-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #c9a96e;
-            margin-bottom: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-        .info-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(201,169,110,0.1);
-        }
-        .info-row:last-child {
-            border-bottom: none;
-        }
-        .info-label {
-            color: rgba(201,169,110,0.7);
-            font-size: 14px;
-        }
-        .info-value {
-            color: #c9a96e;
-            font-weight: 600;
-            font-size: 15px;
-            text-align: right;
-        }
-        .customer-name {
-            font-size: 20px;
-            font-weight: 700;
-            color: #c9a96e;
-            margin-bottom: 8px;
-        }
-        .address-line {
-            color: rgba(201,169,110,0.8);
-            font-size: 14px;
-            line-height: 1.6;
-        }
-        .receipt-preview {
-            width: 100%;
-            max-width: 300px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: transform 0.2s;
-            border: 2px solid rgba(201,169,110,0.2);
-        }
-        .receipt-preview:hover {
-            transform: scale(1.05);
-            border-color: rgba(201,169,110,0.6);
-        }
-        .no-receipt {
-            color: rgba(201,169,110,0.5);
-            font-style: italic;
-        }
-        .action-buttons {
-            display: flex;
-            gap: 10px;
-            margin-top: 20px;
-            flex-wrap: wrap;
-        }
-        .btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        .btn-primary {
-            background: #c9a96e;
-            color: #0f1724;
-        }
-        .btn-secondary {
-            background: rgba(255,255,255,0.1);
-            color: #c9a96e;
-            border: 1px solid rgba(201,169,110,0.3);
-        }
-        .btn-success {
-            background: rgba(76, 175, 80, 0.3);
-            color: #4CAF50;
-            border: 1px solid rgba(76, 175, 80, 0.4);
-        }
-        .btn-print {
-            background: rgba(255,255,255,0.08);
-            color: #fff;
-            border: 1px solid rgba(255,255,255,0.2);
-        }
-        .btn-print:hover {
-            background: rgba(255,255,255,0.15);
-        }
-        .btn:hover {
-            transform: translateY(-2px);
-        }
-        .duty-badge {
-            display: inline-block;
-            padding: 4px 12px;
-            border-radius: 6px;
-            font-size: 12px;
-            font-weight: 600;
-            margin-top: 8px;
-        }
-        .duty-paid {
-            background: rgba(76, 175, 80, 0.2);
-            color: #4CAF50;
-        }
-        .duty-unpaid {
-            background: rgba(255, 152, 0, 0.2);
-            color: #FF9800;
-        }
-        .empty-state {
-            text-align: center;
-            padding: 80px 20px;
-            color: rgba(201,169,110,0.5);
-        }
-        .empty-icon {
-            font-size: 64px;
-            margin-bottom: 20px;
-        }
-        .empty-text {
-            font-size: 24px;
-            font-weight: 600;
-        }
-        .notes {
-            background: rgba(255,255,255,0.02);
-            border-left: 3px solid #c9a96e;
-            padding: 12px;
-            margin-top: 12px;
-            border-radius: 4px;
-            color: rgba(201,169,110,0.9);
-            font-size: 14px;
-            font-style: italic;
-        }
-        
-        /* Receipt Modal/Lightbox */
-        .receipt-modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0,0,0,0.95);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
-            padding: 20px;
-        }
-        .receipt-modal.active {
-            display: flex;
-        }
-        .receipt-modal-content {
-            max-width: 90vw;
-            max-height: 90vh;
-            position: relative;
-        }
-        .receipt-modal img {
-            max-width: 100%;
-            max-height: 90vh;
-            object-fit: contain;
-            border-radius: 8px;
-        }
-        .receipt-modal-close {
-            position: absolute;
-            top: -40px;
-            right: 0;
-            background: #c9a96e;
-            color: #0f1724;
-            border: none;
-            border-radius: 8px;
-            padding: 10px 20px;
-            font-size: 18px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-        .receipt-hint {
-            font-size: 12px;
-            color: rgba(201,169,110,0.6);
-            margin-top: 6px;
-            font-style: italic;
-        }
+        body { margin: 0; padding: 20px; font-family: 'Gill Sans', 'Gill Sans MT', Calibri, sans-serif; background: linear-gradient(135deg, #0f1724 0%, #1a2332 50%, #162030 100%); min-height: 100vh; }
 
-        /* ===================== */
-        /* PRINT STYLES          */
-        /* ===================== */
-@media print {
-    /* Hide all order cards except the one being printed */
-    .order-card-wrapper:not(.printing-this) { display: none !important; }
+        /* LOGIN */
+        .login-screen { display: flex; align-items: center; justify-content: center; min-height: 100vh; margin: -20px; }
+        .login-box { background: rgba(255,255,255,0.05); border: 2px solid rgba(201,169,110,0.4); border-radius: 20px; padding: 50px 60px; text-align: center; width: 100%; max-width: 420px; }
+        .login-logo { font-size: 48px; margin-bottom: 10px; }
+        .login-title { color: #c9a96e; font-size: 28px; font-weight: 700; margin-bottom: 6px; }
+        .login-subtitle { color: rgba(201,169,110,0.6); font-size: 15px; margin-bottom: 36px; }
+        .login-input { width: 100%; padding: 16px 20px; font-size: 18px; background: rgba(255,255,255,0.08); border: 2px solid rgba(201,169,110,0.3); border-radius: 10px; color: #fff; text-align: center; letter-spacing: 3px; margin-bottom: 16px; outline: none; font-family: inherit; }
+        .login-input:focus { border-color: #c9a96e; }
+        .login-input.error { border-color: #ff6b6b; animation: shake 0.3s ease; }
+        @keyframes shake { 0%,100%{transform:translateX(0)} 25%{transform:translateX(-8px)} 75%{transform:translateX(8px)} }
+        .login-btn { width: 100%; padding: 16px; background: #c9a96e; color: #0f1724; border: none; border-radius: 10px; font-size: 18px; font-weight: 700; cursor: pointer; font-family: inherit; }
+        .login-btn:hover { background: #d4b87a; }
+        .login-error { color: #ff6b6b; font-size: 14px; margin-top: 12px; min-height: 20px; }
 
-    /* Also hide the header, filters, stats */
-    .header { display: none !important; }
-    .filters { display: none !important; }
+        /* CHANGE PASSWORD MODAL */
+        .modal-overlay { position: fixed; top:0;left:0;right:0;bottom:0; background: rgba(0,0,0,0.85); z-index: 10000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+        .modal-box { background: #1a2332; border: 2px solid rgba(201,169,110,0.4); border-radius: 16px; padding: 40px; width: 100%; max-width: 400px; }
+        .modal-title { color: #c9a96e; font-size: 22px; font-weight: 700; margin-bottom: 24px; }
+        .modal-label { color: rgba(201,169,110,0.8); font-size: 14px; margin-bottom: 8px; display: block; }
+        .modal-input { width: 100%; padding: 12px 16px; font-size: 16px; background: rgba(255,255,255,0.08); border: 2px solid rgba(201,169,110,0.3); border-radius: 8px; color: #fff; margin-bottom: 16px; outline: none; font-family: inherit; }
+        .modal-input:focus { border-color: #c9a96e; }
+        .modal-buttons { display: flex; gap: 12px; margin-top: 8px; }
+        .modal-btn-confirm { flex:1; padding: 12px; background: #c9a96e; color: #0f1724; border: none; border-radius: 8px; font-size: 16px; font-weight: 700; cursor: pointer; font-family: inherit; }
+        .modal-btn-cancel { flex:1; padding: 12px; background: rgba(255,255,255,0.08); color: #c9a96e; border: 1px solid rgba(201,169,110,0.3); border-radius: 8px; font-size: 16px; cursor: pointer; font-family: inherit; }
+        .modal-message { font-size: 14px; margin-top: 12px; min-height: 20px; }
+        .modal-message.success { color: #4CAF50; }
+        .modal-message.error { color: #ff6b6b; }
 
-    /* Clean up the card being printed */
-    .printing-this {
-        margin: 0 !important;
-        border: none !important;
-        border-radius: 0 !important;
-    }
+        /* DASHBOARD */
+        .header { max-width: 1400px; margin: 0 auto 30px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; }
+        h1 { color: #c9a96e; font-size: 42px; margin: 0; font-weight: 600; }
+        .header-right { display: flex; align-items: center; gap: 16px; flex-wrap: wrap; }
+        .stats { display: flex; gap: 20px; flex-wrap: wrap; }
+        .stat-box { background: rgba(201,169,110,0.1); border-radius: 12px; padding: 15px 25px; border: 1px solid rgba(201,169,110,0.2); }
+        .stat-number { font-size: 32px; font-weight: 700; color: #c9a96e; }
+        .stat-label { font-size: 14px; color: rgba(201,169,110,0.7); text-transform: uppercase; letter-spacing: 1px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .filters { background: rgba(255,255,255,0.04); border-radius: 12px; border: 1px solid rgba(201,169,110,0.2); padding: 20px; margin-bottom: 20px; display: flex; gap: 15px; flex-wrap: wrap; }
+        .filter-btn { padding: 10px 20px; border: 1px solid rgba(201,169,110,0.3); background: rgba(255,255,255,0.04); color: #c9a96e; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: 600; transition: all 0.2s; }
+        .filter-btn:hover { background: rgba(201,169,110,0.1); }
+        .filter-btn.active { background: #c9a96e; color: #0f1724; border-color: #c9a96e; }
+        .btn-lock { padding: 10px 20px; background: rgba(255,255,255,0.06); color: rgba(201,169,110,0.8); border: 1px solid rgba(201,169,110,0.25); border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; white-space: nowrap; font-family: inherit; }
+        .btn-lock:hover { background: rgba(255,255,255,0.1); }
+        .btn-change-pwd { padding: 10px 20px; background: rgba(201,169,110,0.1); color: #c9a96e; border: 1px solid rgba(201,169,110,0.3); border-radius: 8px; cursor: pointer; font-size: 15px; font-weight: 600; white-space: nowrap; font-family: inherit; }
+        .btn-change-pwd:hover { background: rgba(201,169,110,0.2); }
+        .orders-grid { display: grid; gap: 20px; }
+        .order-card { background: rgba(255,255,255,0.04); border-radius: 16px; border: 1px solid rgba(201,169,110,0.2); padding: 25px; transition: all 0.2s; }
+        .order-card:hover { border-color: rgba(201,169,110,0.5); background: rgba(255,255,255,0.06); }
+        .order-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        .order-id { font-size: 14px; color: rgba(201,169,110,0.6); font-family: monospace; }
+        .order-timestamp { font-size: 16px; color: #c9a96e; font-weight: 600; }
+        .status-badge { padding: 6px 16px; border-radius: 20px; font-size: 14px; font-weight: 600; text-transform: uppercase; letter-spacing: 1px; }
+        .status-pending { background: rgba(255,193,7,0.2); color: #ffc107; border: 1px solid rgba(255,193,7,0.4); }
+        .status-processing { background: rgba(33,150,243,0.2); color: #2196F3; border: 1px solid rgba(33,150,243,0.4); }
+        .status-completed { background: rgba(76,175,80,0.2); color: #4CAF50; border: 1px solid rgba(76,175,80,0.4); }
+        .order-body { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 25px; }
+        .section { background: rgba(201,169,110,0.05); border-radius: 12px; padding: 20px; }
+        .section-title { font-size: 18px; font-weight: 700; color: #c9a96e; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 1px; }
+        .info-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid rgba(201,169,110,0.1); }
+        .info-row:last-child { border-bottom: none; }
+        .info-label { color: rgba(201,169,110,0.7); font-size: 14px; }
+        .info-value { color: #c9a96e; font-weight: 600; font-size: 15px; text-align: right; }
+        .customer-name { font-size: 20px; font-weight: 700; color: #c9a96e; margin-bottom: 8px; }
+        .address-line { color: rgba(201,169,110,0.8); font-size: 14px; line-height: 1.6; }
+        .receipt-preview { width: 100%; max-width: 300px; border-radius: 8px; cursor: pointer; transition: transform 0.2s; border: 2px solid rgba(201,169,110,0.2); }
+        .receipt-preview:hover { transform: scale(1.05); border-color: rgba(201,169,110,0.6); }
+        .no-receipt { color: rgba(201,169,110,0.5); font-style: italic; }
+        .action-buttons { display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap; }
+        .btn { padding: 12px 24px; border: none; border-radius: 8px; font-size: 16px; font-weight: 600; cursor: pointer; transition: all 0.2s; font-family: inherit; }
+        .btn-primary { background: #c9a96e; color: #0f1724; }
+        .btn-secondary { background: rgba(255,255,255,0.1); color: #c9a96e; border: 1px solid rgba(201,169,110,0.3); }
+        .btn-success { background: rgba(76,175,80,0.3); color: #4CAF50; border: 1px solid rgba(76,175,80,0.4); }
+        .btn-print { background: rgba(255,255,255,0.08); color: #fff; border: 1px solid rgba(255,255,255,0.2); }
+        .btn-print:hover { background: rgba(255,255,255,0.15); }
+        .btn:hover { transform: translateY(-2px); }
+        .duty-badge { display: inline-block; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; margin-top: 8px; }
+        .duty-paid { background: rgba(76,175,80,0.2); color: #4CAF50; }
+        .duty-unpaid { background: rgba(255,152,0,0.2); color: #FF9800; }
+        .empty-state { text-align: center; padding: 80px 20px; color: rgba(201,169,110,0.5); }
+        .empty-icon { font-size: 64px; margin-bottom: 20px; }
+        .empty-text { font-size: 24px; font-weight: 600; }
+        .notes { background: rgba(255,255,255,0.02); border-left: 3px solid #c9a96e; padding: 12px; margin-top: 12px; border-radius: 4px; color: rgba(201,169,110,0.9); font-size: 14px; font-style: italic; }
+        .receipt-modal { display: none; position: fixed; top:0;left:0;right:0;bottom:0; background: rgba(0,0,0,0.95); z-index: 9999; align-items: center; justify-content: center; padding: 20px; }
+        .receipt-modal.active { display: flex; }
+        .receipt-modal-content { max-width: 90vw; max-height: 90vh; position: relative; }
+        .receipt-modal img { max-width: 100%; max-height: 90vh; object-fit: contain; border-radius: 8px; }
+        .receipt-modal-close { position: absolute; top: -40px; right: 0; background: #c9a96e; color: #0f1724; border: none; border-radius: 8px; padding: 10px 20px; font-size: 18px; font-weight: 600; cursor: pointer; }
+        .receipt-hint { font-size: 12px; color: rgba(201,169,110,0.6); margin-top: 6px; font-style: italic; }
 
-            /* White background, dark text for print */
-            body { background: white !important; }
-
-            .printing-this .order-card,
-            .printing-this { background: white !important; color: #000 !important; }
-
-            .printing-this .section { background: #f5f5f5 !important; border: 1px solid #ddd !important; }
-            .printing-this .section-title { color: #1a2332 !important; }
-            .printing-this .customer-name { color: #1a2332 !important; }
-            .printing-this .order-timestamp { color: #1a2332 !important; }
-            .printing-this .order-id { color: #666 !important; }
-            .printing-this .info-label { color: #555 !important; }
-            .printing-this .info-value { color: #000 !important; }
-            .printing-this .address-line { color: #333 !important; }
-            .printing-this .notes { background: #f9f9f9 !important; color: #333 !important; border-left-color: #1a2332 !important; }
-            .printing-this .info-row { border-bottom-color: #ddd !important; }
-            
-            /* Status badge — print-friendly */
-            .printing-this .status-pending { background: #fff8e1 !important; color: #7c5900 !important; border-color: #ccc !important; }
-            .printing-this .status-processing { background: #e3f2fd !important; color: #0d47a1 !important; border-color: #ccc !important; }
-            .printing-this .status-completed { background: #e8f5e9 !important; color: #1b5e20 !important; border-color: #ccc !important; }
-
-            .printing-this .duty-paid { background: #e8f5e9 !important; color: #1b5e20 !important; }
-            .printing-this .duty-unpaid { background: #fff3e0 !important; color: #7c4200 !important; }
-
-            /* Tracking box */
-            .printing-this [style*="rgba(33, 150, 243"] {
-                background: #f0f6ff !important;
-                border-color: #90caf9 !important;
-            }
-
-            /* Item detail boxes */
-            .printing-this [style*="rgba(255,255,255,0.02)"] {
-                background: #fafafa !important;
-                border-color: #ddd !important;
-            }
-
-            /* Hide buttons and receipt image in print */
-            .printing-this .action-buttons { display: none !important; }
-            .printing-this .receipt-preview { display: none !important; }
-            .printing-this .receipt-hint { display: none !important; }
-
-            /* Print header */
+        /* PRINT */
+        @media print {
+            .order-card-wrapper:not(.printing-this) { display: none !important; }
+            .header { display: none !important; }
+            .filters { display: none !important; }
+            .printing-this { margin: 0 !important; border: none !important; border-radius: 0 !important; }
+            body { background: white !important; padding: 0 !important; }
+            .order-card { background: white !important; border: none !important; }
+            .section { background: #f5f5f5 !important; border: 1px solid #ddd !important; }
+            .section-title { color: #1a2332 !important; }
+            .customer-name { color: #1a2332 !important; }
+            .order-timestamp { color: #1a2332 !important; }
+            .order-id { color: #666 !important; }
+            .info-label { color: #555 !important; }
+            .info-value { color: #000 !important; }
+            .address-line { color: #333 !important; }
+            .notes { background: #f9f9f9 !important; color: #333 !important; border-left-color: #1a2332 !important; }
+            .info-row { border-bottom-color: #ddd !important; }
+            .status-pending { background: #fff8e1 !important; color: #7c5900 !important; border-color: #ccc !important; }
+            .status-processing { background: #e3f2fd !important; color: #0d47a1 !important; border-color: #ccc !important; }
+            .status-completed { background: #e8f5e9 !important; color: #1b5e20 !important; border-color: #ccc !important; }
+            .duty-paid { background: #e8f5e9 !important; color: #1b5e20 !important; }
+            .duty-unpaid { background: #fff3e0 !important; color: #7c4200 !important; }
+            .action-buttons { display: none !important; }
+            .receipt-preview { display: none !important; }
+            .receipt-hint { display: none !important; }
             .print-header { display: block !important; }
         }
-
-        /* Hide print header on screen */
-        .print-header {
-            display: none;
-            text-align: center;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 2px solid #1a2332;
-        }
-        .print-header h2 {
-            margin: 0 0 4px;
-            font-size: 24px;
-            color: #1a2332;
-        }
-        .print-header p {
-            margin: 0;
-            font-size: 13px;
-            color: #666;
-        }
+        .print-header { display: none; text-align: center; margin-bottom: 20px; padding-bottom: 16px; border-bottom: 2px solid #1a2332; }
+        .print-header h2 { margin: 0 0 4px; font-size: 24px; color: #1a2332; }
+        .print-header p { margin: 0; font-size: 13px; color: #666; }
     </style>
 </head>
 <body>
     <div id="root"></div>
     <script>
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useRef } = React;
         const e = React.createElement;
 
+        const DEFAULT_PASSWORD = 'Orders4!';
+        const STORAGE_KEY = 'connolly-orders-password';
+        const SESSION_KEY = 'connolly-orders-authed';
+
+        function getStoredPassword() {
+            return localStorage.getItem(STORAGE_KEY) || DEFAULT_PASSWORD;
+        }
+
         function printOrder(orderId) {
-            // Add the printing-this class to just this card
             const allCards = document.querySelectorAll('.order-card-wrapper');
             allCards.forEach(card => card.classList.remove('printing-this'));
             const target = document.getElementById('order-' + orderId);
             if (target) {
                 target.classList.add('printing-this');
                 window.print();
-                // Clean up after print dialog closes
                 setTimeout(() => target.classList.remove('printing-this'), 1000);
             }
         }
-        
-        function App() {
+
+        // ── LOGIN SCREEN ──────────────────────────────────────────
+        function LoginScreen({ onLogin }) {
+            const [pwd, setPwd] = useState('');
+            const [error, setError] = useState('');
+            const [shake, setShake] = useState(false);
+            const inputRef = useRef(null);
+
+            useEffect(() => { if (inputRef.current) inputRef.current.focus(); }, []);
+
+            const attempt = () => {
+                if (pwd === getStoredPassword()) {
+                    sessionStorage.setItem(SESSION_KEY, '1');
+                    onLogin();
+                } else {
+                    setError('Incorrect password. Please try again.');
+                    setShake(true);
+                    setPwd('');
+                    setTimeout(() => setShake(false), 400);
+                }
+            };
+
+            return e('div', { className: 'login-screen' },
+                e('div', { className: 'login-box' },
+                    e('div', { className: 'login-logo' }, '🔒'),
+                    e('div', { className: 'login-title' }, 'Warehouse Orders'),
+                    e('div', { className: 'login-subtitle' }, 'Connolly — Authorised Access Only'),
+                    e('input', {
+                        ref: inputRef,
+                        type: 'password',
+                        className: 'login-input' + (shake ? ' error' : ''),
+                        placeholder: 'Enter password',
+                        value: pwd,
+                        onChange: ev => { setPwd(ev.target.value); setError(''); },
+                        onKeyDown: ev => { if (ev.key === 'Enter') attempt(); }
+                    }),
+                    e('button', { className: 'login-btn', onClick: attempt }, 'Sign In'),
+                    e('div', { className: 'login-error' }, error)
+                )
+            );
+        }
+
+        // ── CHANGE PASSWORD MODAL ─────────────────────────────────
+        function ChangePasswordModal({ onClose }) {
+            const [current, setCurrent] = useState('');
+            const [newPwd, setNewPwd] = useState('');
+            const [confirm, setConfirm] = useState('');
+            const [message, setMessage] = useState({ text: '', type: '' });
+
+            const save = () => {
+                if (current !== getStoredPassword()) { setMessage({ text: 'Current password is incorrect.', type: 'error' }); return; }
+                if (newPwd.length < 6) { setMessage({ text: 'New password must be at least 6 characters.', type: 'error' }); return; }
+                if (newPwd !== confirm) { setMessage({ text: 'New passwords do not match.', type: 'error' }); return; }
+                localStorage.setItem(STORAGE_KEY, newPwd);
+                setMessage({ text: '✓ Password changed successfully!', type: 'success' });
+                setTimeout(onClose, 1500);
+            };
+
+            return e('div', { className: 'modal-overlay', onClick: onClose },
+                e('div', { className: 'modal-box', onClick: ev => ev.stopPropagation() },
+                    e('div', { className: 'modal-title' }, '🔑 Change Password'),
+                    e('label', { className: 'modal-label' }, 'Current password'),
+                    e('input', { type: 'password', className: 'modal-input', value: current, onChange: ev => setCurrent(ev.target.value) }),
+                    e('label', { className: 'modal-label' }, 'New password'),
+                    e('input', { type: 'password', className: 'modal-input', value: newPwd, onChange: ev => setNewPwd(ev.target.value) }),
+                    e('label', { className: 'modal-label' }, 'Confirm new password'),
+                    e('input', {
+                        type: 'password', className: 'modal-input', value: confirm,
+                        onChange: ev => setConfirm(ev.target.value),
+                        onKeyDown: ev => { if (ev.key === 'Enter') save(); }
+                    }),
+                    e('div', { className: 'modal-buttons' },
+                        e('button', { className: 'modal-btn-confirm', onClick: save }, 'Save Password'),
+                        e('button', { className: 'modal-btn-cancel', onClick: onClose }, 'Cancel')
+                    ),
+                    message.text && e('div', { className: 'modal-message ' + message.type }, message.text)
+                )
+            );
+        }
+
+        // ── MAIN DASHBOARD ────────────────────────────────────────
+        function Dashboard({ onLock }) {
             const [orders, setOrders] = useState({});
             const [filter, setFilter] = useState('all');
             const [modalImage, setModalImage] = useState(null);
-            
+            const [showChangePwd, setShowChangePwd] = useState(false);
+
             useEffect(() => {
                 const ordersRef = db.ref('shipping-orders');
-                ordersRef.on('value', (snapshot) => {
-                    const data = snapshot.val() || {};
-                    setOrders(data);
-                });
+                ordersRef.on('value', snapshot => setOrders(snapshot.val() || {}));
                 return () => ordersRef.off();
             }, []);
-            
+
             const updateOrderStatus = async (orderId, newStatus) => {
                 await db.ref(`shipping-orders/${orderId}`).update({ status: newStatus });
             };
-            
-            const formatDate = (isoString) => {
-                const date = new Date(isoString);
-                return date.toLocaleString('en-GB', {
-                    day: '2-digit', month: 'short', year: 'numeric',
-                    hour: '2-digit', minute: '2-digit'
-                });
-            };
-            
-            const formatCurrency = (amount) => '£' + amount.toFixed(2);
-            
-            const filteredOrders = Object.entries(orders).filter(([id, order]) => {
-                if (filter === 'all') return true;
-                return order.status === filter;
-            });
-            
-            filteredOrders.sort((a, b) => new Date(b[1].timestamp) - new Date(a[1].timestamp));
-            
+
+            const formatDate = iso => new Date(iso).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+            const fmt = amount => '£' + amount.toFixed(2);
+
+            const filteredOrders = Object.entries(orders)
+                .filter(([, o]) => filter === 'all' || o.status === filter)
+                .sort((a, b) => new Date(b[1].timestamp) - new Date(a[1].timestamp));
+
             const stats = {
                 total: Object.keys(orders).length,
                 pending: Object.values(orders).filter(o => o.status === 'pending').length,
                 processing: Object.values(orders).filter(o => o.status === 'processing').length,
                 completed: Object.values(orders).filter(o => o.status === 'completed').length
             };
-            
+
             return e('div', {},
-                // Header
+                showChangePwd && e(ChangePasswordModal, { onClose: () => setShowChangePwd(false) }),
+
                 e('div', { className: 'header' },
                     e('h1', {}, '📦 Warehouse Orders'),
-                    e('div', { className: 'stats' },
-                        e('div', { className: 'stat-box' },
-                            e('div', { className: 'stat-number' }, stats.total),
-                            e('div', { className: 'stat-label' }, 'Total Orders')
+                    e('div', { className: 'header-right' },
+                        e('div', { className: 'stats' },
+                            e('div', { className: 'stat-box' }, e('div', { className: 'stat-number' }, stats.total), e('div', { className: 'stat-label' }, 'Total')),
+                            e('div', { className: 'stat-box' }, e('div', { className: 'stat-number' }, stats.pending), e('div', { className: 'stat-label' }, 'Pending')),
+                            e('div', { className: 'stat-box' }, e('div', { className: 'stat-number' }, stats.processing), e('div', { className: 'stat-label' }, 'Processing')),
+                            e('div', { className: 'stat-box' }, e('div', { className: 'stat-number' }, stats.completed), e('div', { className: 'stat-label' }, 'Completed'))
                         ),
-                        e('div', { className: 'stat-box' },
-                            e('div', { className: 'stat-number' }, stats.pending),
-                            e('div', { className: 'stat-label' }, 'Pending')
-                        ),
-                        e('div', { className: 'stat-box' },
-                            e('div', { className: 'stat-number' }, stats.processing),
-                            e('div', { className: 'stat-label' }, 'Processing')
-                        ),
-                        e('div', { className: 'stat-box' },
-                            e('div', { className: 'stat-number' }, stats.completed),
-                            e('div', { className: 'stat-label' }, 'Completed')
-                        )
+                        e('button', { className: 'btn-change-pwd', onClick: () => setShowChangePwd(true) }, '🔑 Change Password'),
+                        e('button', { className: 'btn-lock', onClick: onLock }, '🔒 Lock')
                     )
                 ),
-                
+
                 e('div', { className: 'container' },
-                    // Filters
                     e('div', { className: 'filters' },
-                        e('button', { className: 'filter-btn' + (filter === 'all' ? ' active' : ''), onClick: () => setFilter('all') }, 'All Orders'),
-                        e('button', { className: 'filter-btn' + (filter === 'pending' ? ' active' : ''), onClick: () => setFilter('pending') }, 'Pending'),
-                        e('button', { className: 'filter-btn' + (filter === 'processing' ? ' active' : ''), onClick: () => setFilter('processing') }, 'Processing'),
-                        e('button', { className: 'filter-btn' + (filter === 'completed' ? ' active' : ''), onClick: () => setFilter('completed') }, 'Completed')
+                        ['all','pending','processing','completed'].map(f =>
+                            e('button', { key: f, className: 'filter-btn' + (filter === f ? ' active' : ''), onClick: () => setFilter(f) },
+                                f === 'all' ? 'All Orders' : f.charAt(0).toUpperCase() + f.slice(1))
+                        )
                     ),
-                    
-                    // Orders
+
                     filteredOrders.length === 0 ?
                         e('div', { className: 'empty-state' },
                             e('div', { className: 'empty-icon' }, '📭'),
@@ -542,15 +316,11 @@
                     e('div', { className: 'orders-grid' },
                         filteredOrders.map(([orderId, order]) =>
                             e('div', { key: orderId, id: 'order-' + orderId, className: 'order-card-wrapper' },
-
-                                // Print header (only shows when printing)
                                 e('div', { className: 'print-header' },
                                     e('h2', {}, 'Connolly — Order Sheet'),
                                     e('p', {}, 'Printed: ' + new Date().toLocaleString('en-GB'))
                                 ),
-
                                 e('div', { className: 'order-card' },
-                                    // Order header
                                     e('div', { className: 'order-header' },
                                         e('div', {},
                                             e('div', { className: 'order-timestamp' }, formatDate(order.timestamp)),
@@ -558,8 +328,6 @@
                                         ),
                                         e('span', { className: 'status-badge status-' + order.status }, order.status)
                                     ),
-                                    
-                                    // Body
                                     e('div', { className: 'order-body' },
                                         // Customer
                                         e('div', { className: 'section' },
@@ -583,110 +351,58 @@
                                                 e('span', { className: 'info-value' }, order.customer.vatEori)
                                             )
                                         ),
-                                        
                                         // Calculation
                                         e('div', { className: 'section' },
                                             e('div', { className: 'section-title' }, 'Calculation'),
-                                            e('div', { className: 'info-row' },
-                                                e('span', { className: 'info-label' }, 'Destination:'),
-                                                e('strong', { className: 'info-value' }, order.calculation.country)
-                                            ),
-                                            e('div', { className: 'info-row' },
-                                                e('span', { className: 'info-label' }, 'Total Goods:'),
-                                                e('span', { className: 'info-value' }, formatCurrency(order.calculation.totalGoods))
-                                            ),
-                                            e('div', { className: 'info-row' },
-                                                e('span', { className: 'info-label' }, 'Duty:'),
-                                                e('span', { className: 'info-value' }, formatCurrency(order.calculation.totalDuty))
-                                            ),
-                                            e('div', { className: 'info-row' },
-                                                e('span', { className: 'info-label' }, 'Tax:'),
-                                                e('span', { className: 'info-value' }, formatCurrency(order.calculation.totalTax))
-                                            ),
-                                            e('div', { className: 'info-row' },
-                                                e('span', { className: 'info-label' }, 'Handling:'),
-                                                e('span', { className: 'info-value' }, formatCurrency(order.calculation.handlingFee))
-                                            ),
+                                            e('div', { className: 'info-row' }, e('span', { className: 'info-label' }, 'Destination:'), e('strong', { className: 'info-value' }, order.calculation.country)),
+                                            e('div', { className: 'info-row' }, e('span', { className: 'info-label' }, 'Total Goods:'), e('span', { className: 'info-value' }, fmt(order.calculation.totalGoods))),
+                                            e('div', { className: 'info-row' }, e('span', { className: 'info-label' }, 'Duty:'), e('span', { className: 'info-value' }, fmt(order.calculation.totalDuty))),
+                                            e('div', { className: 'info-row' }, e('span', { className: 'info-label' }, 'Tax:'), e('span', { className: 'info-value' }, fmt(order.calculation.totalTax))),
+                                            e('div', { className: 'info-row' }, e('span', { className: 'info-label' }, 'Handling:'), e('span', { className: 'info-value' }, fmt(order.calculation.handlingFee))),
                                             e('div', { className: 'info-row', style: { borderTop: '2px solid rgba(201,169,110,0.3)', marginTop: '8px', paddingTop: '8px' } },
                                                 e('strong', { className: 'info-label' }, 'Before Shipping:'),
-                                                e('strong', { className: 'info-value', style: { fontSize: '18px' } }, formatCurrency(order.calculation.grandTotal))
+                                                e('strong', { className: 'info-value', style: { fontSize: '18px' } }, fmt(order.calculation.grandTotal))
                                             ),
-                                            e('div', { className: 'info-row' },
-                                                e('span', { className: 'info-label' }, 'Shipping (' + order.calculation.boxSize + '):'),
-                                                e('span', { className: 'info-value' }, formatCurrency(order.calculation.shippingCost))
-                                            ),
+                                            e('div', { className: 'info-row' }, e('span', { className: 'info-label' }, 'Shipping (' + order.calculation.boxSize + '):'), e('span', { className: 'info-value' }, fmt(order.calculation.shippingCost))),
                                             e('div', { className: 'info-row', style: { borderTop: '2px solid rgba(201,169,110,0.3)', marginTop: '8px', paddingTop: '8px' } },
                                                 e('strong', { className: 'info-label' }, 'TOTAL:'),
-                                                e('strong', { className: 'info-value', style: { fontSize: '20px', color: '#c9a96e' } },
-                                                    formatCurrency(order.calculation.grandTotal + order.calculation.shippingCost))
+                                                e('strong', { className: 'info-value', style: { fontSize: '20px', color: '#c9a96e' } }, fmt(order.calculation.grandTotal + order.calculation.shippingCost))
                                             )
                                         ),
-                                        
                                         // Shipping Details
                                         e('div', { className: 'section' },
                                             e('div', { className: 'section-title' }, 'Shipping Details'),
-                                            e('div', { className: 'info-row' },
-                                                e('span', { className: 'info-label' }, 'Staff Member:'),
-                                                e('span', { className: 'info-value' }, order.staffMember)
-                                            ),
+                                            e('div', { className: 'info-row' }, e('span', { className: 'info-label' }, 'Staff Member:'), e('span', { className: 'info-value' }, order.staffMember)),
                                             e('div', { className: 'info-row' },
                                                 e('span', { className: 'info-label' }, 'Duty Payment:'),
-                                                e('span', { className: 'duty-badge ' + (order.dutyPaid ? 'duty-paid' : 'duty-unpaid') },
-                                                    order.dutyPaid ? 'PAID' : 'UNPAID')
+                                                e('span', { className: 'duty-badge ' + (order.dutyPaid ? 'duty-paid' : 'duty-unpaid') }, order.dutyPaid ? 'PAID' : 'UNPAID')
                                             ),
-                                            
-                                            // Tracking
-                                            e('div', { style: { marginTop: '15px', padding: '12px', background: 'rgba(33, 150, 243, 0.1)', borderRadius: '8px', border: '1px solid rgba(33, 150, 243, 0.3)' } },
+                                            e('div', { style: { marginTop: '15px', padding: '12px', background: 'rgba(33,150,243,0.1)', borderRadius: '8px', border: '1px solid rgba(33,150,243,0.3)' } },
                                                 e('div', { className: 'info-label', style: { marginBottom: '8px' } }, '📦 Tracking Number:'),
                                                 order.trackingNumber ?
                                                     e('div', {},
-                                                        e('a', {
-                                                            href: order.trackingNumber,
-                                                            target: '_blank',
-                                                            style: { color: '#2196F3', fontSize: '14px', wordBreak: 'break-all' }
-                                                        }, order.trackingNumber),
+                                                        e('a', { href: order.trackingNumber, target: '_blank', style: { color: '#2196F3', fontSize: '14px', wordBreak: 'break-all' } }, order.trackingNumber),
                                                         e('button', {
-                                                            onClick: () => {
-                                                                const newTracking = prompt('Update tracking number:', order.trackingNumber);
-                                                                if (newTracking !== null) db.ref(`shipping-orders/${orderId}`).update({ trackingNumber: newTracking });
-                                                            },
-                                                            style: { marginTop: '8px', padding: '6px 12px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(201,169,110,0.3)', borderRadius: '6px', color: '#c9a96e', cursor: 'pointer', fontSize: '12px' }
+                                                            onClick: () => { const t = prompt('Update tracking number:', order.trackingNumber); if (t !== null) db.ref(`shipping-orders/${orderId}`).update({ trackingNumber: t }); },
+                                                            style: { marginTop: '8px', padding: '6px 12px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(201,169,110,0.3)', borderRadius: '6px', color: '#c9a96e', cursor: 'pointer', fontSize: '12px', fontFamily: 'inherit' }
                                                         }, 'Update')
                                                     )
                                                 :
                                                     e('button', {
-                                                        onClick: () => {
-                                                            const tracking = prompt('Enter tracking URL:');
-                                                            if (tracking) db.ref(`shipping-orders/${orderId}`).update({ trackingNumber: tracking });
-                                                        },
-                                                        style: { padding: '10px 16px', background: '#2196F3', border: 'none', borderRadius: '6px', color: 'white', cursor: 'pointer', fontSize: '14px', fontWeight: 600 }
+                                                        onClick: () => { const t = prompt('Enter tracking URL:'); if (t) db.ref(`shipping-orders/${orderId}`).update({ trackingNumber: t }); },
+                                                        style: { padding: '10px 16px', background: '#2196F3', border: 'none', borderRadius: '6px', color: 'white', cursor: 'pointer', fontSize: '14px', fontWeight: 600, fontFamily: 'inherit' }
                                                     }, '+ Add Tracking Number')
                                             ),
-                                            
-                                            // Item Details
                                             order.itemDetails && order.itemDetails.length > 0 && e('div', { style: { marginTop: '15px' } },
                                                 e('div', { className: 'info-label', style: { marginBottom: '10px', fontSize: '16px', fontWeight: 600 } }, 'Items for Customs:'),
                                                 order.itemDetails.map((item, idx) =>
-                                                    e('div', {
-                                                        key: idx,
-                                                        style: { background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '6px', marginBottom: '8px', border: '1px solid rgba(201,169,110,0.15)' }
-                                                    },
-                                                        item.description && e('div', { style: { marginBottom: '4px' } },
-                                                            e('strong', { style: { color: 'rgba(201,169,110,0.9)', fontSize: '13px' } }, 'Description: '),
-                                                            e('span', { style: { color: 'rgba(201,169,110,0.7)', fontSize: '13px' } }, item.description)
-                                                        ),
-                                                        item.composition && e('div', { style: { marginBottom: '4px' } },
-                                                            e('strong', { style: { color: 'rgba(201,169,110,0.9)', fontSize: '13px' } }, 'Composition: '),
-                                                            e('span', { style: { color: 'rgba(201,169,110,0.7)', fontSize: '13px' } }, item.composition)
-                                                        ),
-                                                        item.origin && e('div', {},
-                                                            e('strong', { style: { color: 'rgba(201,169,110,0.9)', fontSize: '13px' } }, 'Origin: '),
-                                                            e('span', { style: { color: 'rgba(201,169,110,0.7)', fontSize: '13px' } }, item.origin)
-                                                        )
+                                                    e('div', { key: idx, style: { background: 'rgba(255,255,255,0.02)', padding: '10px', borderRadius: '6px', marginBottom: '8px', border: '1px solid rgba(201,169,110,0.15)' } },
+                                                        item.description && e('div', { style: { marginBottom: '4px' } }, e('strong', { style: { color: 'rgba(201,169,110,0.9)', fontSize: '13px' } }, 'Description: '), e('span', { style: { color: 'rgba(201,169,110,0.7)', fontSize: '13px' } }, item.description)),
+                                                        item.composition && e('div', { style: { marginBottom: '4px' } }, e('strong', { style: { color: 'rgba(201,169,110,0.9)', fontSize: '13px' } }, 'Composition: '), e('span', { style: { color: 'rgba(201,169,110,0.7)', fontSize: '13px' } }, item.composition)),
+                                                        item.origin && e('div', {}, e('strong', { style: { color: 'rgba(201,169,110,0.9)', fontSize: '13px' } }, 'Origin: '), e('span', { style: { color: 'rgba(201,169,110,0.7)', fontSize: '13px' } }, item.origin))
                                                     )
                                                 )
                                             ),
-                                            
                                             order.receiptUrl && e('div', { style: { marginTop: '15px' } },
                                                 e('div', { className: 'info-label', style: { marginBottom: '8px' } }, 'Receipt:'),
                                                 e('div', { onClick: () => setModalImage(order.receiptUrl), style: { cursor: 'pointer' } },
@@ -698,50 +414,35 @@
                                             order.additionalNotes && e('div', { className: 'notes' }, '💬 ' + order.additionalNotes)
                                         )
                                     ),
-                                    
-                                    // Actions — including new Print button
                                     e('div', { className: 'action-buttons' },
-                                        order.status === 'pending' && e('button', {
-                                            className: 'btn btn-primary',
-                                            onClick: () => updateOrderStatus(orderId, 'processing')
-                                        }, 'Start Processing'),
-                                        order.status === 'processing' && e('button', {
-                                            className: 'btn btn-success',
-                                            onClick: () => updateOrderStatus(orderId, 'completed')
-                                        }, 'Mark Complete'),
-                                        order.status === 'completed' && e('button', {
-                                            className: 'btn btn-secondary',
-                                            onClick: () => updateOrderStatus(orderId, 'pending')
-                                        }, 'Reopen Order'),
-                                        
-                                        // 🖨️ Print button — always visible
-                                        e('button', {
-                                            className: 'btn btn-print',
-                                            onClick: () => printOrder(orderId)
-                                        }, '🖨️ Print Order')
+                                        order.status === 'pending' && e('button', { className: 'btn btn-primary', onClick: () => updateOrderStatus(orderId, 'processing') }, 'Start Processing'),
+                                        order.status === 'processing' && e('button', { className: 'btn btn-success', onClick: () => updateOrderStatus(orderId, 'completed') }, 'Mark Complete'),
+                                        order.status === 'completed' && e('button', { className: 'btn btn-secondary', onClick: () => updateOrderStatus(orderId, 'pending') }, 'Reopen Order'),
+                                        e('button', { className: 'btn btn-print', onClick: () => printOrder(orderId) }, '🖨️ Print Order')
                                     )
                                 )
                             )
                         )
                     )
                 ),
-                
-                // Receipt Modal
-                modalImage && e('div', {
-                    className: 'receipt-modal active',
-                    onClick: () => setModalImage(null)
-                },
-                    e('div', {
-                        className: 'receipt-modal-content',
-                        onClick: (ev) => ev.stopPropagation()
-                    },
+
+                modalImage && e('div', { className: 'receipt-modal active', onClick: () => setModalImage(null) },
+                    e('div', { className: 'receipt-modal-content', onClick: ev => ev.stopPropagation() },
                         e('button', { className: 'receipt-modal-close', onClick: () => setModalImage(null) }, '✕ Close'),
                         e('img', { src: modalImage, alt: 'Receipt Full Size' })
                     )
                 )
             );
         }
-        
+
+        // ── ROOT APP ──────────────────────────────────────────────
+        function App() {
+            const [authed, setAuthed] = useState(() => sessionStorage.getItem(SESSION_KEY) === '1');
+            const handleLock = () => { sessionStorage.removeItem(SESSION_KEY); setAuthed(false); };
+            if (!authed) return e(LoginScreen, { onLogin: () => setAuthed(true) });
+            return e(Dashboard, { onLock: handleLock });
+        }
+
         ReactDOM.render(e(App), document.getElementById('root'));
     </script>
 </body>
