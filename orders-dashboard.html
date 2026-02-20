@@ -338,7 +338,7 @@
                     e('div', { className: 'order-header' },
                         e('div', {},
                             e('div', { className: 'order-timestamp' }, formatDate(order.timestamp)),
-                            e('div', { className: 'order-id' }, 'Order ID: ' + orderId.slice(0, 8))
+                            e('div', { className: 'order-id' }, 'Order #' + (order.orderNumber || orderId.slice(0, 8)))
                         ),
                         e('span', { className: 'status-badge status-' + (isArchived ? 'archived' : order.status) }, isArchived ? 'Archived' : order.status)
                     ),
