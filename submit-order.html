@@ -205,6 +205,19 @@
             font-size: 18px;
             line-height: 1.6;
         }
+        .success-order-number {
+            display: inline-block;
+            margin: 20px auto;
+            padding: 16px 32px;
+            background: rgba(201,169,110,0.15);
+            border: 2px solid rgba(201,169,110,0.4);
+            border-radius: 12px;
+            color: #c9a96e;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            font-family: monospace;
+        }
         .error-message {
             background: rgba(244, 67, 54, 0.2);
             border: 1px solid rgba(244, 67, 54, 0.4);
@@ -220,11 +233,24 @@
     <script>
         const { useState } = React;
         const e = React.createElement;
+
+        // Generate next sequential order number using Firebase transaction
+        // This is safe even if two people submit at the same moment
+        async function getNextOrderNumber() {
+            const counterRef = db.ref('order-id-counter');
+            const result = await counterRef.transaction(currentValue => {
+                return (currentValue || 0) + 1;
+            });
+            const newCount = result.snapshot.val();
+            // Pad to 6 digits: 1 → "000001", 42 → "000042"
+            return String(newCount).padStart(6, '0');
+        }
         
         function App() {
             const [submitted, setSubmitted] = useState(false);
             const [submitting, setSubmitting] = useState(false);
             const [error, setError] = useState(null);
+            const [submittedOrderNumber, setSubmittedOrderNumber] = useState(null);
             
             // Get calculation data from URL params
             const params = new URLSearchParams(window.location.search);
@@ -275,7 +301,7 @@
                     console.log('Starting submission...');
                     let receiptUrl = null;
                     
-                    // Convert receipt photo to base64 (no Firebase Storage needed)
+                    // Convert receipt photo to base64
                     if (receiptFile) {
                         console.log('Converting receipt to base64...');
                         receiptUrl = await new Promise((resolve, reject) => {
@@ -284,11 +310,17 @@
                             reader.onerror = reject;
                             reader.readAsDataURL(receiptFile);
                         });
-                        console.log('Receipt converted to base64');
+                        console.log('Receipt converted');
                     }
+
+                    // Get the next sequential order number (e.g. "000042")
+                    console.log('Getting order number...');
+                    const orderNumber = await getNextOrderNumber();
+                    console.log('Order number:', orderNumber);
                     
-                    // Create order object
+                    // Create order object — orderNumber stored as a field
                     const order = {
+                        orderNumber,
                         timestamp: new Date().toISOString(),
                         customer: {
                             name: customerName,
@@ -313,11 +345,12 @@
                         status: 'pending'
                     };
                     
+                    // Save to Firebase using the order number as the key
                     console.log('Saving order to Firebase...');
-                    // Save to Firebase
-                    await db.ref('shipping-orders').push(order);
+                    await db.ref('shipping-orders/' + orderNumber).set(order);
                     
                     console.log('Order submitted successfully!');
+                    setSubmittedOrderNumber(orderNumber);
                     setSubmitted(true);
                 } catch (err) {
                     console.error('Error submitting order:', err);
@@ -344,6 +377,7 @@
                     e('div', { className: 'success-message' },
                         e('div', { className: 'success-icon' }, '✓'),
                         e('div', { className: 'success-title' }, 'Order Submitted Successfully!'),
+                        e('div', { className: 'success-order-number' }, 'Order #' + submittedOrderNumber),
                         e('div', { className: 'success-text' }, 
                             'The warehouse team has been notified and will process this shipping order shortly.'
                         ),
@@ -567,7 +601,7 @@
                         'Describe items being shipped (for customs documentation)'
                     ),
                     
-                    // Item details table
+                    // Item details
                     itemDetails.map((item, i) =>
                         e('div', {
                             key: i,
