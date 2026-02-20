@@ -129,6 +129,8 @@
         .btn-archive:hover { background: rgba(255,152,0,0.28); }
         .btn-unarchive { background: rgba(158,158,158,0.15); color: #bbb; border: 1px solid rgba(158,158,158,0.3); }
         .btn-unarchive:hover { background: rgba(158,158,158,0.25); }
+        .btn-delete { background: rgba(244,67,54,0.12); color: #f44336; border: 1px solid rgba(244,67,54,0.3); }
+        .btn-delete:hover { background: rgba(244,67,54,0.25); }
         .btn:hover { transform: translateY(-2px); }
         .duty-badge { display: inline-block; padding: 4px 12px; border-radius: 6px; font-size: 12px; font-weight: 600; margin-top: 8px; }
         .duty-paid { background: rgba(76,175,80,0.2); color: #4CAF50; }
@@ -301,8 +303,27 @@
             );
         }
 
+        // ── DELETE CONFIRM ────────────────────────────────────────
+        function DeleteModal({ order, onConfirm, onCancel }) {
+            const name = (order.customer && order.customer.name) || 'this order';
+            return e('div', { className: 'modal-overlay', onClick: onCancel },
+                e('div', { className: 'archive-modal-box', onClick: ev => ev.stopPropagation() },
+                    e('div', { className: 'archive-modal-title', style: { color: '#f44336' } }, '🗑️ Delete Order?'),
+                    e('div', { className: 'archive-modal-text' }, `Permanently delete the order for ${name}? This cannot be undone.`),
+                    e('div', { className: 'archive-modal-buttons' },
+                        e('button', {
+                            className: 'btn-archive-confirm',
+                            style: { background: 'rgba(244,67,54,0.3)', color: '#f44336', border: '1px solid rgba(244,67,54,0.5)' },
+                            onClick: onConfirm
+                        }, 'Yes, Delete Permanently'),
+                        e('button', { className: 'modal-btn-cancel', style: { flex: 'none', padding: '12px 28px' }, onClick: onCancel }, 'Cancel')
+                    )
+                )
+            );
+        }
+
         // ── SINGLE ORDER CARD ─────────────────────────────────────
-        function OrderCard({ orderId, order, onArchive, onUnarchive, onUpdateStatus, onImageClick, searchTerm, isArchived }) {
+        function OrderCard({ orderId, order, onArchive, onUnarchive, onDelete, onUpdateStatus, onImageClick, searchTerm, isArchived }) {
             const formatDate = iso => new Date(iso).toLocaleString('en-GB', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
             const fmt = n => '£' + n.toFixed(2);
             const hl = text => e(Highlighted, { text: String(text || ''), term: searchTerm });
@@ -413,7 +434,8 @@
                         !isArchived && order.status === 'completed' && e('button', { className: 'btn btn-secondary', onClick: () => onUpdateStatus(orderId, 'pending') }, 'Reopen Order'),
                         !isArchived && e('button', { className: 'btn btn-archive', onClick: () => onArchive(orderId, order) }, '📦 Archive'),
                         isArchived && e('button', { className: 'btn btn-unarchive', onClick: () => onUnarchive(orderId) }, '↩ Restore'),
-                        e('button', { className: 'btn btn-print', onClick: () => printOrder(orderId) }, '🖨️ Print Order')
+                        e('button', { className: 'btn btn-print', onClick: () => printOrder(orderId) }, '🖨️ Print Order'),
+                        e('button', { className: 'btn btn-delete', onClick: () => onDelete(orderId, order) }, '🗑️ Delete')
                     )
                 )
             );
@@ -429,6 +451,7 @@
             const [modalImage, setModalImage] = useState(null);
             const [showChangePwd, setShowChangePwd] = useState(false);
             const [archiveTarget, setArchiveTarget] = useState(null);
+            const [deleteTarget, setDeleteTarget] = useState(null);
 
             useEffect(() => {
                 const activeRef = db.ref('shipping-orders');
@@ -458,6 +481,15 @@
                 await db.ref(`shipping-orders-archive/${orderId}`).remove();
             };
 
+            const doDelete = async () => {
+                if (!deleteTarget) return;
+                const { orderId } = deleteTarget;
+                // Delete from whichever collection it's in
+                await db.ref(`shipping-orders/${orderId}`).remove();
+                await db.ref(`shipping-orders-archive/${orderId}`).remove();
+                setDeleteTarget(null);
+            };
+
             const stats = {
                 total: Object.keys(orders).length,
                 pending: Object.values(orders).filter(o => o.status === 'pending').length,
@@ -475,6 +507,7 @@
             return e('div', {},
                 showChangePwd && e(ChangePasswordModal, { onClose: () => setShowChangePwd(false) }),
                 archiveTarget && e(ArchiveModal, { order: archiveTarget.order, onConfirm: doArchive, onCancel: () => setArchiveTarget(null) }),
+                deleteTarget && e(DeleteModal, { order: deleteTarget.order, onConfirm: doDelete, onCancel: () => setDeleteTarget(null) }),
 
                 // Header
                 e('div', { className: 'header' },
@@ -537,6 +570,7 @@
                                 key: orderId, orderId, order,
                                 onArchive: (id, o) => setArchiveTarget({ orderId: id, order: o }),
                                 onUnarchive: doUnarchive,
+                                onDelete: (id, o) => setDeleteTarget({ orderId: id, order: o }),
                                 onUpdateStatus: updateOrderStatus,
                                 onImageClick: setModalImage,
                                 searchTerm,
