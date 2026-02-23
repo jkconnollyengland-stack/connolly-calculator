@@ -1,90 +1,70 @@
 # Connolly App — Session Handover
-**Date:** 20 February 2026  
-**Session transcript:** 2026-02-20-15-04-46-orders-dashboard-password-gdpr-protection.txt  
+**Date:** 23 February 2026  
+**Previous transcript:** 2026-02-23-08-59-27-orders-dashboard-password-gdpr-archive-search.txt
 
 ---
 
-## What we've built so far
+## Files and their current state
 
-### orders-dashboard.html — COMPLETED THIS SESSION ✅
-Full warehouse orders dashboard. Everything below is in the current file.
+### orders-dashboard.html ✅ COMPLETE (this session)
+All features done and working:
+- Password protection (default: `Orders4!`, changeable in-app, stored in localStorage)
+- Lock button clears session
+- **Search** — real-time filter across name, email, phone, address, country, staff, tracking. Highlights matches in gold.
+- **Archive tab** — Archive button per order, confirmation dialog, moves to `shipping-orders-archive` in Firebase. Restore button brings it back.
+- **Delete button** — red 🗑️ button on every order (active and archived), confirmation dialog, permanent delete from Firebase
+- **Print** — prints single order cleanly, white background, hides buttons
+- Status workflow: Pending → Processing → Completed → Reopen
+- Order number display: shows `Order #000001` (falls back to truncated Firebase key for old orders)
 
-**Password protection**
-- Login screen shown on every page load
-- Default password: `Orders4!`
-- Password is changeable from inside the dashboard (🔑 Change Password button)
-- New password saved to browser localStorage — persists across sessions
-- Lock button (🔒) signs out immediately
-- Session stored in sessionStorage — expires when tab closes
+### submit-order.html ✅ COMPLETE (this session)
+- Sequential order IDs: reads/increments `order-id-counter` in Firebase using atomic transaction
+- Order saved as `shipping-orders/000001` etc. (number is also stored as `orderNumber` field)
+- Success screen shows `Order #000001` in a gold box
+- Everything else unchanged from previous version
 
-**Search**
-- Search box filters all orders in real time
-- Searches: customer name, email, phone, address, postcode, country, staff member, tracking number
-- Matching text is highlighted in gold
-- Result count shown while searching
-- × button to clear search
-- Works on both Active and Archive tabs
+### connolly-calculator-with-admin.html 🔄 IN PROGRESS
+**Change needed:** Restructure the totals display section.
 
-**Archiving**
-- Active orders tab has a 📦 Archive button per order
-- Confirmation dialog before archiving
-- Archived orders move to Firebase path `shipping-orders-archive` (separate from `shipping-orders`)
-- Archive tab shows all archived orders with grey "Archived" badge
-- ↩ Restore button on archived orders moves them back to active
-- Both tabs show a count badge
+**Current layout** (after all items):
+- Handling Fee
+- Total Goods
+- Total Duty  
+- Total Tax
+- Total Before Shipping
+- [Box size selector with shipping options]
 
-**Print fix**
-- Print button prints only the target order (fixed the 13-blank-pages bug)
-- Print styles: white background, black text, hides buttons and receipt images
-- Print header "Connolly — Order Sheet" appears at top of printed page
+**Wanted layout:**
+- Total Goods
+- Duty & Tax (combined: totalDuty + totalTax)
+- *(divider)*
+- Handling Fee & Shipping (combined: handlingFee + shippingBoxes[selectedBox].price)
+- *(divider)*  
+- Grand Total (grandTotal + shippingBoxes[selectedBox].price)
 
-**Status workflow**
-- Pending → Start Processing → Mark Complete → (Reopen if needed)
-- Archive button available on any status
+**How to do this:** User needs to upload the calculator HTML file into the chat. Claude will edit it and produce a complete replacement file. The box size selector section below the totals stays for now — that's a separate task.
 
----
-
-## Next task — NOT YET DONE ❌
-
-### Sequential Order IDs on submit-order.html
-**Goal:** Orders should be numbered sequentially (000001, 000002...) instead of random Firebase keys  
-**How:** When a new order is submitted, read a counter from Firebase, increment it, save the order with the formatted ID as a field, save the counter back  
-**Firebase path for counter:** `order-id-counter` (a single integer)  
-**Format:** 6-digit zero-padded string, e.g. `000001`, `000042`, `001337`  
-**Display:** Show as "Order #000001" in the dashboard order header instead of the truncated Firebase key  
-
-**To do this, Claude needs:**
-- The raw GitHub URL for `submit-order.html`
-- Ask Jem to paste it at the start of the next session
-
-**Dashboard change also needed:** Once order IDs are sequential, update the order header in `orders-dashboard.html` to show `Order #${order.orderNumber}` instead of `Order ID: ${orderId.slice(0,8)}`
+**Note:** User also wants flat-rate shipping by country eventually (Europe £20, USA £30, Rest of World £40) and to remove box size selector — but that's a future session.
 
 ---
 
-## Firebase structure (for reference)
+## Firebase structure
 
 ```
-swis-9b0ce (Firebase project)
-├── shipping-orders/          ← active orders (Firebase push keys)
-│   └── {pushKey}/
-│       ├── timestamp
-│       ├── status            (pending / processing / completed)
-│       ├── staffMember
-│       ├── dutyPaid
-│       ├── trackingNumber
-│       ├── receiptUrl
-│       ├── additionalNotes
-│       ├── customer/
-│       │   ├── name, email, phone, vatEori
-│       │   └── address/ (line1, line2, line3, line4, postcode)
-│       ├── calculation/
-│       │   ├── country, totalGoods, totalDuty, totalTax
-│       │   ├── handlingFee, grandTotal, shippingCost, boxSize
-│       └── itemDetails[]     (description, composition, origin)
+swis-9b0ce (Firebase project, europe-west1)
+├── shipping-orders/
+│   └── {000001, 000002...}/     ← keyed by order number
+│       ├── orderNumber           ← "000001" etc.
+│       ├── timestamp, status, staffMember, dutyPaid
+│       ├── trackingNumber, receiptUrl, additionalNotes
+│       ├── customer/ (name, email, phone, vatEori, address/)
+│       ├── calculation/ (country, totalGoods, totalDuty, totalTax,
+│       │                  handlingFee, grandTotal, shippingCost, boxSize)
+│       └── itemDetails[] (description, composition, origin)
 │
-├── shipping-orders-archive/  ← archived orders (same structure + archivedAt field)
+├── shipping-orders-archive/     ← same structure + archivedAt field
 │
-└── order-id-counter          ← TO BE CREATED: integer, starts at 0
+└── order-id-counter             ← integer, auto-incremented on each submit
 ```
 
 ---
@@ -92,17 +72,28 @@ swis-9b0ce (Firebase project)
 ## GitHub repo
 https://github.com/jkconnollyengland-stack/connolly-calculator
 
-Main files:
-- `connolly-calculator-with-admin.html` — main duty/tax calculator
-- `orders-dashboard.html` — warehouse orders dashboard (updated this session)
-- `submit-order.html` — order submission form (next session)
+Files:
+- `connolly-calculator-with-admin.html` — main calculator (needs totals update)
+- `orders-dashboard.html` — warehouse dashboard ✅
+- `submit-order.html` — order submission form ✅
+- `PROGRESS.md` — this file
+
+---
+
+## Passwords
+- Calculator admin: `connolly2025`
+- Orders dashboard: `Orders4!` (changeable in-app)
 
 ---
 
 ## User notes
-- Jem, 61, non-technical — needs simple step-by-step instructions for GitHub edits
-- GitHub method: edit file → find-and-replace → commit changes
-- For new files: create file → paste content → commit
+- Jem, 61, non-technical
+- GitHub method: open file → pencil icon → edit → Commit changes
+- For uploading new files: drag file into chat → Claude edits → download → replace on GitHub
 - Hard refresh after upload: Ctrl+Shift+R
-- Admin password for calculator: `connolly2025`
-- Orders dashboard password: `Orders4!` (changeable in-app)
+- Prefers receiving complete replacement files over find-and-replace instructions
+
+## Future tasks (not yet started)
+- Flat-rate shipping by country: Europe £20, USA £30, Rest of World £40
+- Remove box size selector from calculator
+- These two go together — one task for a future session
