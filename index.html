@@ -173,6 +173,10 @@ const LOGO_URL = "https://raw.githubusercontent.com/jkconnollyengland-stack/conn
             const saved = localStorage.getItem('connolly-postage-override');
             return saved ? parseFloat(saved) : null;
         });
+        const [shippingSurcharge, setShippingSurcharge] = useState(() => {
+            const saved = localStorage.getItem('connolly-shipping-surcharge');
+            return saved ? parseFloat(saved) : 1.3;
+        });
 
         const [data, setData] = useState(() => {
             // Try to load from localStorage first
@@ -210,6 +214,11 @@ const LOGO_URL = "https://raw.githubusercontent.com/jkconnollyengland-stack/conn
                 localStorage.setItem('connolly-postage-override', postageOverride);
             }
         }, [postageOverride]);
+        
+        // Save shipping surcharge multiplier to localStorage
+        React.useEffect(() => {
+            localStorage.setItem('connolly-shipping-surcharge', shippingSurcharge.toString());
+        }, [shippingSurcharge]);
         
         const [country, setCountry] = useState("");
         const [items, setItems] = useState([{ cat: "", val: "" }]);
@@ -299,7 +308,7 @@ const LOGO_URL = "https://raw.githubusercontent.com/jkconnollyengland-stack/conn
             const firstRow = data.find(d => d.country === country);
             if (!firstRow) return [];
             
-            // If postage override is set, use it for all boxes
+            // If postage override is set, use it for all boxes (NOT multiplied by surcharge)
             if (postageOverride !== null) {
                 return BOX_LABELS.map((label, i) => ({
                     label,
@@ -309,14 +318,17 @@ const LOGO_URL = "https://raw.githubusercontent.com/jkconnollyengland-stack/conn
                 }));
             }
             
-            // Otherwise use individual box prices from data
-            return firstRow.boxes.map((price, i) => ({
-              label: BOX_LABELS[i],
-              dims: BOX_DIMS[i],
-              price,
-              total: grandTotal + price
-            }));
-        }, [country, grandTotal, data, postageOverride]);
+            // Otherwise use individual box prices from data, multiplied by surcharge
+            return firstRow.boxes.map((price, i) => {
+              const surchargedPrice = price * shippingSurcharge;
+              return {
+                label: BOX_LABELS[i],
+                dims: BOX_DIMS[i],
+                price: surchargedPrice,
+                total: grandTotal + surchargedPrice
+              };
+            });
+        }, [country, grandTotal, data, postageOverride, shippingSurcharge]);
         
         
         
@@ -665,6 +677,71 @@ const LOGO_URL = "https://raw.githubusercontent.com/jkconnollyengland-stack/conn
                                 fontWeight: 600 
                             } 
                         }, `✓ Active: All box sizes now cost £${postageOverride.toFixed(2)} for shipping`)
+                    ),
+                    
+                    // Shipping Surcharge Multiplier
+                    e('div', {
+                        style: {
+                            background: 'rgba(201,169,110,0.15)',
+                            borderRadius: '12px',
+                            border: '2px solid #c9a96e',
+                            padding: '28px',
+                            marginBottom: '24px'
+                        }
+                    },
+                        e('h2', { style: { fontSize: '24px', marginBottom: '12px', color: '#c9a96e', fontWeight: 600 } }, '🚢 Shipping Surcharge Multiplier'),
+                        e('p', { style: { marginBottom: '20px', color: '#c9a96e', opacity: 0.9, fontSize: '18px' } }, 
+                            'Adjust the surcharge applied to all shipping rates. Default is 1.3 (30% surcharge). Increase when shipping costs rise (e.g. geopolitical situations affecting routes).'
+                        ),
+                        e('div', { style: { display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap' } },
+                            e('label', { style: { color: '#c9a96e', fontSize: '20px', fontWeight: 600 } }, 'Multiplier:'),
+                            e('input', {
+                                type: 'number',
+                                step: '0.01',
+                                min: '1',
+                                value: shippingSurcharge,
+                                onChange: (ev) => {
+                                    const val = parseFloat(ev.target.value);
+                                    if (!isNaN(val) && val > 0) {
+                                        setShippingSurcharge(val);
+                                    }
+                                },
+                                style: {
+                                    padding: '14px 18px',
+                                    fontSize: '20px',
+                                    background: '#fff',
+                                    border: '2px solid #c9a96e',
+                                    borderRadius: '8px',
+                                    color: '#000',
+                                    width: '180px',
+                                    fontWeight: 600
+                                }
+                            }),
+                            shippingSurcharge !== 1.3 && e('button', {
+                                onClick: () => setShippingSurcharge(1.3),
+                                style: {
+                                    padding: '14px 24px',
+                                    background: '#8b7355',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    fontSize: '18px',
+                                    fontWeight: 600
+                                }
+                            }, '🔄 Reset to 1.3')
+                        ),
+                        e('div', { 
+                            style: { 
+                                marginTop: '18px', 
+                                padding: '16px',
+                                background: 'rgba(201,169,110,0.2)',
+                                borderRadius: '8px',
+                                color: '#c9a96e', 
+                                fontSize: '18px',
+                                fontWeight: 600 
+                            } 
+                        }, `✓ Current: ${shippingSurcharge.toFixed(2)}× multiplier (${((shippingSurcharge - 1) * 100).toFixed(0)}% surcharge on base shipping rates)`)
                     ),
                     
                     // Country selector for admin
