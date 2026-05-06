@@ -113,15 +113,41 @@
   { country:"United Arab Emirates", category:"ANTIQUES", hts:"97069000", F:1.05, G:1.05, H:63, boxes:[55.38,73.333,82.303,166.517,108.095], T:16 },
   { country:"United Arab Emirates", category:"ART", hts:"97020000", F:1.05, G:1.05, H:63, boxes:[55.38,73.333,82.303,166.517,108.095], T:16 },
   { country:"United Arab Emirates", category:"HOMEWARES", hts:"6912002111", F:1.05, G:1.05, H:63, boxes:[55.38,73.333,82.303,166.517,108.095], T:16 },
-  { country:"United States", category:"FASHION", hts:"6103410000", F:1.18, G:1.05, H:null, boxes:[23.855,29.718,32.344,79.066,38.636], T:16 },
-  { country:"United States", category:"LEATHER GOODS", hts:"42029110", F:1.1, G:1.05, H:null, boxes:[23.855,29.718,32.344,79.066,38.636], T:16 },
+  { country:"United States", category:"COTTON SHIRTS", hts:"62052020", F:1.197, G:1.05, H:null, boxes:[23.855,29.718,32.344,79.066,38.636], T:16 },
+  { country:"United States", category:"COTTON TROUSERS", hts:"62034245", F:1.166, G:1.05, H:null, boxes:[23.855,29.718,32.344,79.066,38.636], T:16 },
+  { country:"United States", category:"SILK SHIRTS", hts:"62061000", F:1.069, G:1.05, H:null, boxes:[23.855,29.718,32.344,79.066,38.636], T:16 },
+  { country:"United States", category:"WOOL SHIRTS", hts:"62059010", F:1.028, G:1.05, H:null, boxes:[23.855,29.718,32.344,79.066,38.636], T:16 },
+  { country:"United States", category:"WOOL TROUSERS", hts:"62034110", F:1.175, G:1.05, H:null, boxes:[23.855,29.718,32.344,79.066,38.636], T:16 },
+  { country:"United States", category:"WOOL JACKETS", hts:"62033110", F:1.175, G:1.05, H:null, boxes:[23.855,29.718,32.344,79.066,38.636], T:16 },
+  { country:"United States", category:"WOOL COATS", hts:"62019190", F:1.163, G:1.05, H:null, boxes:[23.855,29.718,32.344,79.066,38.636], T:16 },
+  { country:"United States", category:"LEATHER SHOES", hts:"64039960", F:1.085, G:1.05, H:null, boxes:[23.855,29.718,32.344,79.066,38.636], T:16 },
+  { country:"United States", category:"LEATHER SMALL GOODS", hts:"42023160", F:1.08, G:1.05, H:null, boxes:[23.855,29.718,32.344,79.066,38.636], T:16 },
+  { country:"United States", category:"LEATHER LUGGAGE", hts:"42022150", F:1.08, G:1.05, H:null, boxes:[23.855,29.718,32.344,79.066,38.636], T:16 },
+  { country:"United States", category:"ORIGINAL ART", hts:"97010000", F:1.0, G:1.05, H:null, boxes:[23.855,29.718,32.344,79.066,38.636], T:16 },
+  { country:"United States", category:"ORIGINAL SCULPTURE", hts:"97030000", F:1.0, G:1.05, H:null, boxes:[23.855,29.718,32.344,79.066,38.636], T:16 },
   { country:"United States", category:"ANTIQUES", hts:"97069000", F:1.0, G:1.05, H:null, boxes:[23.855,29.718,32.344,79.066,38.636], T:16 },
-  { country:"United States", category:"ART", hts:"97020000", F:1.0, G:1.05, H:null, boxes:[23.855,29.718,32.344,79.066,38.636], T:16 },
-  { country:"United States", category:"HOMEWARES", hts:"6912002111", F:1.1, G:1.05, H:null, boxes:[23.855,29.718,32.344,79.066,38.636], T:16 },];
+  { country:"United States", category:"HOMEWARES", hts:"69120021", F:1.09, G:1.05, H:null, boxes:[23.855,29.718,32.344,79.066,38.636], T:16 },];
     
     const BOX_LABELS = ["Small", "Medium", "Large", "XL", "XXL"];
     const BOX_DIMS = ["26×20×16cm", "35×27×10cm", "40×32×18cm", "48×40×39cm", "50×50×16cm"];
     const CATEGORIES = ["FASHION", "LEATHER GOODS", "ANTIQUES", "ART", "HOMEWARES"];
+    // For United States destinations only — more granular due to wide MFN rate variation
+    const US_CATEGORIES = [
+        "COTTON SHIRTS",
+        "COTTON TROUSERS",
+        "SILK SHIRTS",
+        "WOOL SHIRTS",
+        "WOOL TROUSERS",
+        "WOOL JACKETS",
+        "WOOL COATS",
+        "LEATHER SHOES",
+        "LEATHER SMALL GOODS",
+        "LEATHER LUGGAGE",
+        "ORIGINAL ART",
+        "ORIGINAL SCULPTURE",
+        "ANTIQUES",
+        "HOMEWARES"
+    ];
     
     function calcTotal(value, row) {
       if (!value || value <= 0) return 0;
@@ -1136,7 +1162,10 @@
                                         }
                                     },
                                         e('option', { value: '' }, '— Select —'),
-                                        CATEGORIES.map(c => e('option', { key: c, value: c }, c))
+                                        (country === "United States"
+                                            ? US_CATEGORIES
+                                            : CATEGORIES
+                                        ).map(c => e('option', { key: c, value: c }, c))
                                     )
                                 ),
                                 e('div', { style: { flex: 1 } },
