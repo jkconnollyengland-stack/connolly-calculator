@@ -1,4 +1,5 @@
 
+
 <!DOCTYPE html>
 <html>
 <head>
@@ -141,7 +142,16 @@
         const [adminPwd, setAdminPwd] = useState("");
         const [editingCell, setEditingCell] = useState(null);
         const [handlingFeeOverride, setHandlingFeeOverride] = useState(null);
-     
+
+        // Shipping surcharge multiplier (multiplies the base "less surcharge" box prices)
+        const [surchargeMultiplier, setSurchargeMultiplier] = useState(() => {
+            const saved = localStorage.getItem('connolly-shipping-surcharge');
+            const n = saved === null ? 1.3 : parseFloat(saved);
+            return (isNaN(n) || n <= 0) ? 1.3 : n;
+        });
+        React.useEffect(() => {
+            localStorage.setItem('connolly-shipping-surcharge', String(surchargeMultiplier));
+        }, [surchargeMultiplier]);
 
         const [data, setData] = useState(() => {
             // Try to load from localStorage first
@@ -350,14 +360,14 @@
                 }));
             }
             
-            // Otherwise use individual box prices from data
+            // Otherwise use individual box prices from data, multiplied by the surcharge
             return firstRow.boxes.map((price, i) => ({
               label: BOX_LABELS[i],
               dims: BOX_DIMS[i],
-              price,
-              total: grandTotal + price
+              price: price * surchargeMultiplier,
+              total: grandTotal + (price * surchargeMultiplier)
             }));
-       }, [country, grandTotal, data]);
+       }, [country, grandTotal, data, surchargeMultiplier]);
         
         
         
@@ -643,7 +653,71 @@
                             } 
                         }, `✓ Active: All calculations now use £${handlingFeeOverride.toFixed(2)} handling fee`)
                     ),
-                    
+
+                    // Shipping Surcharge Multiplier
+                    e('div', {
+                        style: {
+                            background: 'rgba(201,169,110,0.15)',
+                            borderRadius: '12px',
+                            border: '2px solid #c9a96e',
+                            padding: '28px',
+                            marginBottom: '24px'
+                        }
+                    },
+                        e('h2', { style: { fontSize: '24px', marginBottom: '12px', color: '#c9a96e', fontWeight: 600 } }, '🚢 Shipping Surcharge Multiplier'),
+                        e('p', { style: { marginBottom: '20px', color: '#c9a96e', opacity: 0.9, fontSize: '18px' } },
+                            'Adjusts all box shipping prices by a multiplier. Default is 1.3 (a 30% surcharge). Change this when shipping surcharges increase or decrease.'
+                        ),
+                        e('div', { style: { display: 'flex', gap: '15px', alignItems: 'center', flexWrap: 'wrap' } },
+                            e('label', { style: { color: '#c9a96e', fontSize: '20px', fontWeight: 600 } }, 'Multiplier:'),
+                            e('input', {
+                                type: 'number',
+                                step: '0.01',
+                                min: '0.01',
+                                value: surchargeMultiplier,
+                                onChange: (ev) => {
+                                    const val = parseFloat(ev.target.value);
+                                    if (!isNaN(val) && val > 0) setSurchargeMultiplier(val);
+                                },
+                                placeholder: '1.3',
+                                style: {
+                                    padding: '14px 18px',
+                                    fontSize: '20px',
+                                    background: '#fff',
+                                    border: '2px solid #c9a96e',
+                                    borderRadius: '8px',
+                                    color: '#000',
+                                    width: '180px',
+                                    fontWeight: 600
+                                }
+                            }),
+                            surchargeMultiplier !== 1.3 && e('button', {
+                                onClick: () => setSurchargeMultiplier(1.3),
+                                style: {
+                                    padding: '14px 24px',
+                                    background: '#8b7355',
+                                    color: '#fff',
+                                    border: 'none',
+                                    borderRadius: '8px',
+                                    cursor: 'pointer',
+                                    fontSize: '18px',
+                                    fontWeight: 600
+                                }
+                            }, 'Reset to 1.3')
+                        ),
+                        e('div', {
+                            style: {
+                                marginTop: '18px',
+                                padding: '16px',
+                                background: 'rgba(201,169,110,0.2)',
+                                borderRadius: '8px',
+                                color: '#c9a96e',
+                                fontSize: '18px',
+                                fontWeight: 600
+                            }
+                        }, `✓ Active: Shipping prices are multiplied by ${surchargeMultiplier.toFixed(2)} (${Math.round((surchargeMultiplier - 1) * 100)}% surcharge)`)
+                    ),
+
 // Per-Country Shipping Rate
                     e('div', {
                         style: {
